@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.1 2009/09/23 15:19:25 spiderr Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.2 2009/11/17 14:35:04 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @package LibertyForm
  */
 
@@ -91,11 +91,13 @@ class LibertyForm extends LibertyMime {
 	 * @param array $pParamHash hash of values that will be used to store the page
 	 * @return boolean TRUE on success, FALSE on failure - mErrors will contain reason for failure
 	 */
-	public function store(&$pParamHash) {
+	public function store(&$pParamHash=NULL) {
 		if(empty($this->mChildPkgName)) {
 			$this->mErrors['store'] = "Configuration error, don't know package name";
 			return(FALSE);
 		}
+		// If no updated data hash passed in fake pParamHash from objects existing data
+		if($pParamHash == NULL) $pParamHash = $this->fakeStoreHash();
 		$childStore = $this->mChildPkgName.'_store';
 		if($this->verifyData($pParamHash, $childStore) && parent::store($pParamHash)) {
 			$this->mDb->StartTrans();
@@ -157,6 +159,18 @@ class LibertyForm extends LibertyMime {
 		return(@BitBase::verifyId($this->mId) && @BitBase::verifyId($this->mContentId));
 	} /// }}}
 
+	// {{{ setField() set a value in the mInfo hash
+	/**
+	 * @param string $pKey the key into the mInfo hash
+	 * @param value $pValue the value to set the hash element to
+	 * @return boolean whether the field was sucessfully set
+	 */
+	public function setField($pKey, $pValue) {
+		// TODO sanity checking should be here otherwise may as well access mInfo directly
+		$this->mInfo[$pKey] = $pValue;
+		return TRUE;
+	} // }}} setField()
+
 	// {{{ getFields() get the gui form elements to edit and display the data
 	/**
 	 * @return array List of objects GUI fields
@@ -188,6 +202,39 @@ class LibertyForm extends LibertyMime {
 // }}} ---- end public functions
 
 // {{{ ---- protected functions ----
+	// {{{ fakeStoreHash() produce a param hash for self::store() using existing data/defaults
+	/**
+	 * @return array param hash that can be passed to self::store() to cause DB to update
+	 */
+	protected function fakeStoreHash() {
+		$paramHash = array();
+		// LibertyContent items
+		if(array_key_exists('title', $this->mInfo)) $paramHash['title'] = $this->mInfo['title'];
+
+		// The derived field elements
+		foreach($this->mFields as $fieldname => $field) {
+			// If object has a value set for the field use this
+			if(array_key_exists($fieldname, $this->mInfo)) {
+				// Multiple fields are weird and need special processing - TODO I don't think this is generic enough!
+				if($field['type'] == 'multiple') {
+					$idx = 1;
+					foreach($this->mInfo[$fieldname] as $mfid => $mfval) {
+						foreach($field['fields'] as $mfname => $mfattrs) {
+							if($mfname != 'remove') $paramHash[$fieldname][$mfname][$idx] = $mfval[$mfname];
+						}
+						$idx++;
+					}
+				} else {
+					$paramHash[$fieldname] = $this->mInfo[$fieldname];
+				}
+			// Else if there exists a default value then use this
+			} elseif(array_key_exists('defval', $field)) {
+				$paramHash[$fieldname] = $field['defval'];
+			}
+		}
+		return $paramHash;
+	} // }}} fakeStoreHash()
+
 	// {{{ verifyData() make sure the data is safe to store
 	/** This function is responsible for data integrity and validation before any operations are performed with the $pParamHash
 	 *
@@ -369,7 +416,7 @@ class LibertyForm extends LibertyMime {
 				$this->mInfo[$fieldname] = $pParamHash[$pChildStore][$fieldname];
 			}
 		} // end Loop through fields
-	} // }}} getFields()
+	} // }}} verifyFields()
 
 	// {{{ privateGetFields() process gui form elements
 	/**
