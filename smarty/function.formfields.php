@@ -329,11 +329,8 @@ function optionsInput($sparams, $field, &$smarty) {
 		if($realopts > 1) break; // Currently don't care if any more than 1 real option so don't waste time
 	}
 
-	if(($realopts == 0) && // No real options and
-	   !(isset($field['shownullopt']) && array_key_exists(0, $sparams['options']))) { // no NULL option we want to show
-		return "";
-	} elseif((($realopts == 1) && !isset($field['shownullopt'])) || // Only 1 (real) option and not showing null option, or
-	         (isset($field['createonly']) && $field['createonly'] && !empty($sparams['selected']))) { // 'create only' field
+	if((($realopts == 1) && !isset($field['shownullopt'])) || // Only 1 (real) option and not showing null option, or
+	   (isset($field['createonly']) && $field['createonly'] && !empty($sparams['selected']))) { // 'create only' field
 		// Don't bother with the dropdown, just show text and a hidden field for value.
 		$selected = (empty($sparams['selected'])? $savekey : $sparams['selected']); // if nothing selected use only value
 		if(isset($field['displayfunc']) && is_callable($field['displayfunc'])) {
@@ -346,6 +343,9 @@ function optionsInput($sparams, $field, &$smarty) {
 			$display = 'No displayable val, here\'s the Id: <em>optionval=</em>&quot;'.$selected.'&quot;';
 		}
 		return $display.'<input type="hidden" name="'.$sparams['name'].'" id="'.$sparams['id'].'" value="'.$selected.'" />';
+	} elseif(($realopts == 0) && // No real options and
+	   !(isset($field['shownullopt']) && array_key_exists(0, $sparams['options']))) { // no NULL option we want to show
+		return "";
 	} else { // normal drop down option processing
 		require_once($smarty->_get_plugin_filepath('function', 'html_options'));
 		return smarty_function_html_options($sparams, $smarty);
