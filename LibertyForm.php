@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.3 2009/11/27 17:53:29 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.4 2009/11/27 17:59:07 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @package LibertyForm
  */
 
@@ -211,29 +211,53 @@ class LibertyForm extends LibertyMime {
 		// LibertyContent items
 		if(array_key_exists('title', $this->mInfo)) $paramHash['title'] = $this->mInfo['title'];
 
+		// Real work done by a seperate function as may need calling recursively
+		$this->buildFakeHash($this->mFields, $paramHash);
+
+		return $paramHash;
+	} // }}} fakeStoreHash()
+
+	// {{{ buildFakeHash() process gui form elements
+	/**
+	 * Function is called from fakeStoreHash, is seperate func so it can be recursive for sub forms
+	 */
+	protected function buildFakeHash($pFields, &$pParamHash) {
 		// The derived field elements
-		foreach($this->mFields as $fieldname => $field) {
+		foreach($pFields as $fieldname => $field) {
 			// If object has a value set for the field use this
 			if(array_key_exists($fieldname, $this->mInfo)) {
-				// Multiple fields are weird and need special processing - TODO I don't think this is generic enough!
+				// Certain field types are weird and need special processing
 				if($field['type'] == 'multiple') {
 					$idx = 1;
 					foreach($this->mInfo[$fieldname] as $mfid => $mfval) {
 						foreach($field['fields'] as $mfname => $mfattrs) {
-							if($mfname != 'remove') $paramHash[$fieldname][$mfname][$idx] = $mfval[$mfname];
+							if($mfname != 'remove') $pParamHash[$fieldname][$mfname][$idx] = $mfval[$mfname];
 						}
 						$idx++;
 					}
+				} elseif($field['type'] == 'boolack') {
+					switch($this->mInfo[$fieldname]) {
+						case 'a':
+							$pParamHash[$fieldname][] = 'a';
+							// No break - fallthru to 'y' is intentional
+						case 'y':
+							$pParamHash[$fieldname][] = 'y';
+							break;
+						case 'n':
+						default:
+							// No entry in param hash, just like a real form would do
+							break;
+					}
 				} else {
-					$paramHash[$fieldname] = $this->mInfo[$fieldname];
+					$pParamHash[$fieldname] = $this->mInfo[$fieldname];
 				}
 			// Else if there exists a default value then use this
 			} elseif(array_key_exists('defval', $field)) {
-				$paramHash[$fieldname] = $field['defval'];
+				$pParamHash[$fieldname] = $field['defval'];
 			}
+			if($field['type'] == 'boolfields') $this->buildFakeHash($field['fields'], $pParamHash);
 		}
-		return $paramHash;
-	} // }}} fakeStoreHash()
+	} // }}} buildFakeHash()
 
 	// {{{ verifyData() make sure the data is safe to store
 	/** This function is responsible for data integrity and validation before any operations are performed with the $pParamHash
