@@ -38,6 +38,7 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 		$extradiv = '';
 		$htmldiv = '<div class="row">';
 		$htmldiv .= smarty_function_formlabel(array('label'=>$field['description'], 'for'=>$fieldname), $gBitSmarty);
+		$htmldiv .= '<input type="hidden" name="'.$grpname.'[_fields]['.$fieldname.']" id="fields_'.$fieldname.'" value="'.$field['type'].'" />';
 		switch($field['type']) {
 			case 'checkboxes':
 				$smartyparams = array(

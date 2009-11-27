@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.4 2009/11/27 17:59:07 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.5 2009/11/27 19:16:41 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @package LibertyForm
  */
 
@@ -316,11 +316,16 @@ class LibertyForm extends LibertyMime {
 	 * Function is called from verifyData, is seperate func so it can be recursively called for sub forms
 	 */
 	private function verifyFields($fields, &$pParamHash, $pChildStore) {
+		// Set boolean if the paramhash contains a hash specifying a limited set of fields
+		$limitedFieldset = (isset($pParamHash['_fields']) && is_array($pParamHash['_fields']));
 		// Loop through the given fields and process each one
 		foreach($fields as $fieldname => $field) {
 			// Defaults to stop PHP whining
 			if(!isset($field['type'])) $field['type'] = 'text';
 			if(!isset($field['typopt'])) $field['typopt'] = '';
+
+			// Ignore any fields that are not set in the special '_fields' part of the param Hash.
+			if($limitedFieldset && !isset($pParamHash['_fields'][$fieldname])) continue;
 
 			// If field is in the hash then it is being changed
 			if(array_key_exists($fieldname, $pParamHash)) {
