@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.2 2009/11/17 14:35:04 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.3 2009/11/27 17:53:29 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @package LibertyForm
  */
 
@@ -275,7 +275,7 @@ class LibertyForm extends LibertyMime {
 
 		// Most of the fields for this object (its children) are defined in a big array, we call a
 		// private function to deal with this as it might want to call itself to deal with sub forms
-		$this->verifyFields($this->mFields, $pParamHash, $pChildStore);
+		$this->verifyFields($this->getFields(), $pParamHash, $pChildStore);
 
 		return(count($this->mErrors) == 0);
 	} // }}} verifyData()
@@ -349,7 +349,7 @@ class LibertyForm extends LibertyMime {
 							case 'remove':
 								$removeidxs = $colvals; // Should only be one 'remove' column
 								break;
-							default;
+							default:
 								foreach($colvals as $idx => $colval) {
 									// If empty 'required' value, mark index to be deleted
 									if(empty($colval) && isset($colattrs['required']) && ($colattrs['required'] == TRUE)) {
@@ -393,7 +393,7 @@ class LibertyForm extends LibertyMime {
 					$pParamHash[$pChildStore][$fieldname] = $pParamHash[$fieldname];
 				}
 			// If field is not in hash but it is a required one we need to do more checking
-			} elseif(isset($field['required'])) {
+			} elseif(isset($field['required']) && $field['required']) {
 				if((($field['type'] == 'options') && ($field['typopt'] == 'multiple')) ||
 				   ($field['type'] == 'checkboxes')) {
 					$this->mErrors[$fieldname] = $field['description']." needs at least one option selected.";
