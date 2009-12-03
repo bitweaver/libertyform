@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.5 2009/11/27 19:16:41 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.6 2009/12/03 15:36:41 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @package LibertyForm
  */
 
@@ -469,6 +469,15 @@ class LibertyForm extends LibertyMime {
 					}
 				} elseif($val['type'] == 'boolfields') {
 					$this->privateGetFields($val['fields'], $this->mInfo);
+				} elseif(($val['type'] == 'checkboxes') && (array_key_exists(0, $val['options']))) {
+					// A checkboxes options array with a key of zero is assumed to have bad bitmap keys
+					$fixed_options = array();
+					$bit = 1;
+					foreach($val['options'] as $option) {
+						$fixed_options[$bit] = $option;
+						$bit <<= 1; // shift to the next bit
+					}
+					$val['options'] = $fixed_options;
 				}
 			}
 		}
