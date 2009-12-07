@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.6 2009/12/03 15:36:41 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.7 2009/12/07 15:16:37 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @package LibertyForm
  */
 
@@ -173,13 +173,15 @@ class LibertyForm extends LibertyMime {
 
 	// {{{ getFields() get the gui form elements to edit and display the data
 	/**
-	 * @return array List of objects GUI fields
+	 * @param array hash of fields(keys) the caller wants to see in returned array, unlimited if not specified
+	 * @return array List of this objects GUI fields
 	 */
-	public function getFields() {
+	public function getFields($pWantedFields=NULL) {
+		$fields = (($pWantedFields == NULL) ?  $this->mFields : array_intersect_key($this->mFields, $pWantedFields));
 		// call a seperate private function to do the work as it might need to call itself to process sub forms
-		self::privateGetFields($this->mFields);
+		self::privateGetFields($fields, $pWantedFields);
 
-		return $this->mFields;
+		return $fields;
 	} // }}} getFields()
 
 	// {{{ getDisplayUrl() generates the URL to view this object
@@ -450,10 +452,11 @@ class LibertyForm extends LibertyMime {
 	// {{{ privateGetFields() process gui form elements
 	/**
 	 * Function is called from getFields, is seperate func so it can be recursive for sub forms
+	 * @param array hash of fields(keys) the caller wants to see in returned array, unlimited if not specified
 	 */
-	private function privateGetFields(&$fields) {
+	private function privateGetFields(&$pFields, $pWantedFields=NULL) {
 		// Populate any current values that are already set
-		foreach($fields as $name => &$val) {
+		foreach($pFields as $name => &$val) {
 			$val['value'] = NULL;
 			if(!empty($this->mInfo[$name])) {
 				$val['value'] = $this->mInfo[$name];
@@ -468,7 +471,14 @@ class LibertyForm extends LibertyMime {
 						$mfval['value'] = ((($mfval['type'] == 'radio') && isset($this->mInfo[$mfname])) ? $this->mInfo[$mfname] : NULL);
 					}
 				} elseif($val['type'] == 'boolfields') {
-					$this->privateGetFields($val['fields'], $this->mInfo);
+					$subwanted = NULL;
+					if(isset($pWantedFields) && is_array($pWantedFields[$name])) {
+						$subwanted = $pWantedFields[$name];
+						foreach($val['fields'] as $name => $field) {
+							if(!array_key_exists($name, $subwanted)) unset($val['fields'][$name]);
+						}
+					}
+					$this->privateGetFields($val['fields'], $subwanted);
 				} elseif(($val['type'] == 'checkboxes') && (array_key_exists(0, $val['options']))) {
 					// A checkboxes options array with a key of zero is assumed to have bad bitmap keys
 					$fixed_options = array();
