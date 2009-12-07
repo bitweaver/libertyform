@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.5 2009/12/07 16:39:51 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.6 2009/12/07 19:23:18 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -159,6 +159,21 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 									'selected' => $mfval[$mfname],
 									'id' => $htmlid);
 								$tdcontent = optionsInput($smartyparams, $mf, $gBitSmarty); // might be empty if no options
+								break;
+							case 'boolack':
+								$boolparams = '';
+								$ackparams = 'disabled="disabled" ';
+								if($mfval[$mfname] == 'y') { // field true but not acknowledged
+									$boolparams = 'checked="checked" ';
+									$ackparams = '';
+								} elseif($mfval[$mfname] == 'a') { // field true and acknowledged
+									$boolparams = 'checked="checked" ';
+									$ackparams = 'checked="checked" ';
+								}
+								$tdcontent = '<input type="checkbox" name="'.$htmlname.'[]" id="'.$htmlid.'" 
+									value="y" onchange="boolackFlip(this)" '.$boolparams.'/>';
+								$tdcontent .= ' '.$mf['acktext'].
+									'<input type="checkbox" name="'.$htmlname.'[]" id="'.$htmlid.'_ack" value="a" '.$ackparams.'/>';
 								break;
 							case 'checkbox': // Lack of 'break' and fallthrough to 'remove' is intentional
 								if($mfval[$mfname] == 'y') $params = 'checked="checked"';
