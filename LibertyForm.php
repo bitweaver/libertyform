@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.8 2009/12/09 21:24:44 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.9 2009/12/09 21:59:52 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @package LibertyForm
  */
 
@@ -78,6 +78,8 @@ class LibertyForm extends LibertyMime {
 				$this->mInfo['editor'] = (!empty($result->fields['modifier_real_name']) ? $result->fields['modifier_real_name'] : $result->fields['modifier_user']);
 				$this->mInfo['display_name'] = BitUser::getTitle($this->mInfo);
 				$this->mInfo['display_url'] = $this->getDisplayUrl();
+				$this->mInfo['edit_url'] = $this->getEditUrl();
+				$this->mInfo['remove_url'] = $this->getRemoveUrl();
 				$this->mInfo['parsed_data'] = $this->parseData();
 
 				parent::load();
@@ -189,18 +191,24 @@ class LibertyForm extends LibertyMime {
 	 * @return string URL of this objects view page
 	 */
 	public function getDisplayUrl() {
-		global $gBitSystem;
-		$ret = NULL;
-		if(@$this->isValid()) {
-			$ret = $this->mBaseURL;
-			if($gBitSystem->isFeatureActive('pretty_urls') || $gBitSystem->isFeatureActive('pretty_urls_extended')) {
-				$ret .= $this->mId;
-			} else {
-				$ret .= "index.php?".$this->mChildIdName."=".$this->mId;
-			}
-		}
-		return $ret;
-	} // }}}
+		return (@$this->isValid() ? $this->getUrl($this->mBaseURL, $this->mChildIdName, $this->mId) : NULL);
+	} // }}} getDisplayUrl()
+
+	// {{{ getEditUrl() generates the URL to edit this object
+	/**
+	 * @return string URL of this objects edit page
+	 */
+	public function getEditUrl() {
+		return (@$this->isValid() ? $this->getUrl($this->mBaseURL, $this->mChildIdName, $this->mId, "edit") : NULL);
+	} // }}} getEditUrl()
+
+	// {{{ getRemoveUrl() generates the URL to remove this object
+	/**
+	 * @return string URL of this objects edit page
+	 */
+	public function getRemoveUrl() {
+		return (@$this->isValid() ? $this->getUrl($this->mBaseURL, $this->mChildIdName, $this->mId, "remove") : NULL);
+	} // }}} getEditUrl()
 // }}} ---- end public functions
 
 // {{{ ---- protected functions ----
@@ -310,6 +318,28 @@ class LibertyForm extends LibertyMime {
 		$this->mErrors['verify'] = "::verify() should not be called directly";
 		return FALSE; // Always Fail!
 	} // }}} verify()
+
+	// {{{ getUrl() generates a URL to gain access to a specific type of function on this object
+	/**
+	 * @return string URL of this objects edit page
+	 */
+	protected static function getUrl($pBaseURL, $pChildIdName, $pId, $pFunction="") {
+		global $gBitSystem;
+		if(empty($pFunction)) {
+			$pretty_func = "";
+			$normal_func = "index";
+		} else {
+			$pretty_func = $pFunction."/";
+			$normal_func = $pFunction;
+		}
+		$ret = $pBaseURL;
+		if($gBitSystem->isFeatureActive('pretty_urls') || $gBitSystem->isFeatureActive('pretty_urls_extended')) {
+			$ret .= $pretty_func.$pId;
+		} else {
+			$ret .= $normal_func.".php?".$pChildIdName."=".$pId;
+		}
+		return $ret;
+	} // }}} getUrl()
 // }}} ---- end protected functions ----
 
 // {{{ ---- private functions ----
