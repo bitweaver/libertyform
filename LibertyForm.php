@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.7 2009/12/07 15:16:37 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.8 2009/12/09 21:24:44 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @package LibertyForm
  */
 
@@ -386,7 +386,19 @@ class LibertyForm extends LibertyMime {
 									if(empty($colval) && isset($colattrs['required']) && ($colattrs['required'] == TRUE)) {
 										$removerows[$idx] = $idx; // key is same as val to avoid duplicates
 									}
-									$bindvarray[$idx][$colname] = $colval;
+									if($colattrs['type'] == 'boolack') {
+										if(!is_array($colval)) { // Something is broken
+											$bindvarray[$idx][$colname] = 'n';
+										} elseif(in_array('a', $colval) && in_array('y', $colval)) {
+											$bindvarray[$idx][$colname] = 'a';
+										} elseif(in_array('y', $colval)) {
+											$bindvarray[$idx][$colname] = 'y';
+										} else { // Something weird is going on
+											$bindvarray[$idx][$colname] = 'n';
+										}
+									} else {
+										$bindvarray[$idx][$colname] = $colval;
+									}
 								}
 								break;
 						}
