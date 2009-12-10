@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.6 2009/12/07 19:23:18 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.7 2009/12/10 13:59:02 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -34,67 +34,27 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 
 	$html = '';
 	require_once($gBitSmarty->_get_plugin_filepath('function', 'formlabel'));
+	require_once($gBitSmarty->_get_plugin_filepath('function', 'formfield'));
 	require_once($gBitSmarty->_get_plugin_filepath('block', 'forminput'));
 	foreach($fields as $fieldname => $field) {
 		$extradiv = '';
 		$htmldiv = '<div class="row">';
 		$htmldiv .= smarty_function_formlabel(array('label'=>$field['description'], 'for'=>$fieldname), $gBitSmarty);
 		$htmldiv .= '<input type="hidden" name="'.$grpname.'[_fields]['.$fieldname.']" id="fields_'.$fieldname.'" value="'.$field['type'].'" />';
-// TODO refactor - can probably now use smarty_function_formfield() to deal with most of these
 		switch($field['type']) {
 			case 'checkboxes':
-				$smartyparams = array(
-					'name' => $grpname."[".$fieldname."]",
-					'options' => $field['options'],
-					// If value is not an array assume it is a bitfield
-					'selected' => (is_array($field['value']) ? $field['value'] : bf2array($field['value'])),
-					'id' => $fieldname);
-				require_once($gBitSmarty->_get_plugin_filepath('function', 'html_checkboxes'));
-				$forminput = smarty_function_html_checkboxes($smartyparams, $gBitSmarty);
-				break;
 			case 'checkbox':
-				$boolparams = (($field['value'] == 'y') ? 'checked="checked" ' : '');
-				$forminput = '<input type="checkbox" name="'.$grpname.'['.$fieldname.']" id="'.$fieldname.'"
-					value="y" '.$boolparams.'/>';
-				break;
-			case 'options':
-				$smartyparams = array(
-					'name' => $grpname."[".$fieldname."]",
-					'options' => optionsArray($field),
-					'selected' => $field['value'],
-					'id' => $fieldname);
-				$forminput = optionsInput($smartyparams, $field, $gBitSmarty);
-				if(empty($forminput)) $forminput = "<em>Sorry, no options available right now!</em>";
-				break;
 			case 'radios':
-				$smartyparams = array(
-					'name' => $grpname."[".$fieldname."]",
-					'options' => $field['options'],
-					'selected' => $field['value'],
-					'id' => $fieldname);
-				require_once($gBitSmarty->_get_plugin_filepath('function', 'html_radios'));
-				$forminput = smarty_function_html_radios($smartyparams, $gBitSmarty);
-				break;
+			case 'options':
 			case 'date':
-				$smartyparams = array(
-					'field_array' => $grpname."[".$fieldname."]",
-					'prefix' => "",
-					'time' => $field['value'],
-					'start_year' => "-100",
-					'end_year' => "+100");
-				if(isset($field['typopt'])) {
-					if($field['typopt'] == 'past') {
-						$smartyparams['end_year'] = '-0';
-					} elseif($field['typopt'] == 'future') {
-						$smartyparams['start_year'] = '-0';
-					}
-				}
-				require_once($gBitSmarty->_get_plugin_filepath('function', 'html_select_date'));
-				$forminput = smarty_function_html_select_date($smartyparams, $gBitSmarty);
-				break;
 			case 'hidden':
-				$forminput = '<input type="hidden" name="'.$grpname.'['.$fieldname.']" id="'.$fieldname.'" value="'.$field['value'].'" />';
-				$htmldiv = ''; // Get rid of row div and forminput
+			case 'boolack':
+				$smartyparams = array(
+					'name' => $fieldname,
+					'grpname' => $grpname,
+					'field' => $field);
+				$forminput = smarty_function_formfield($smartyparams, $gBitSmarty);
+				if($field['type'] == 'hidden') $htmldiv = ''; // Get rid of row div and forminput
 				break;
 			case 'boolfields':
 				$boolparams = $divparams = '';
@@ -110,21 +70,6 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 					'grpname' => $grpname);
 				$subform = smarty_function_formfields($smartyparams, $gBitSmarty);
 				$extradiv = '<div id="'.$fieldname.'_fielddiv" '.$divparams.' class="subform">'.$subform.'</div>';
-				break;
-			case 'boolack':
-				$boolparams = '';
-				$ackparams = 'disabled="disabled" ';
-				if($field['value'] == 'y') { // field true but not acknowledged
-					$boolparams = 'checked="checked" ';
-					$ackparams = '';
-				} elseif($field['value'] == 'a') { // field true and acknowledged
-					$boolparams = 'checked="checked" ';
-					$ackparams = 'checked="checked" ';
-				}
-				$forminput = '<input type="checkbox" name="'.$grpname.'['.$fieldname.'][]" id="'.$fieldname.'" 
-					value="y" onchange="boolackFlip(this)" '.$boolparams.'/>';
-				$forminput .= ' '.$field['acktext'].
-					'<input type="checkbox" name="'.$grpname.'['.$fieldname.'][]" id="'.$fieldname.'_ack" value="a" '.$ackparams.'/>';
 				break;
 			case 'multiple':
 				// If no values currently in this 'multiple' field
@@ -161,19 +106,8 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 								$tdcontent = optionsInput($smartyparams, $mf, $gBitSmarty); // might be empty if no options
 								break;
 							case 'boolack':
-								$boolparams = '';
-								$ackparams = 'disabled="disabled" ';
-								if($mfval[$mfname] == 'y') { // field true but not acknowledged
-									$boolparams = 'checked="checked" ';
-									$ackparams = '';
-								} elseif($mfval[$mfname] == 'a') { // field true and acknowledged
-									$boolparams = 'checked="checked" ';
-									$ackparams = 'checked="checked" ';
-								}
-								$tdcontent = '<input type="checkbox" name="'.$htmlname.'[]" id="'.$htmlid.'" 
-									value="y" onchange="boolackFlip(this)" '.$boolparams.'/>';
-								$tdcontent .= ' '.$mf['acktext'].
-									'<input type="checkbox" name="'.$htmlname.'[]" id="'.$htmlid.'_ack" value="a" '.$ackparams.'/>';
+								$tdcontent = boolackInput(
+									array('value'=>$mfval[$mfname],'acktext'=>$mf['acktext']), $htmlname, $htmlid);
 								break;
 							case 'checkbox': // Lack of 'break' and fallthrough to 'remove' is intentional
 								if($mfval[$mfname] == 'y') $params = 'checked="checked"';
@@ -222,6 +156,10 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 								'id' => $htmlid);
 							$tdcontent = optionsInput($smartyparams, $mf, $gBitSmarty); // might be empty if no options
 							if(empty($tdcontent)) $nooptions = TRUE;
+							break;
+						case 'boolack':
+							$tdcontent = boolackInput(
+								array('value'=>$defval,'acktext'=>$mf['acktext']), $htmlname, $htmlid);
 							break;
 						case 'remove':
 							$tdcontent = '&nbsp;';
