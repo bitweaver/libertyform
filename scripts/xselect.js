@@ -21,6 +21,9 @@ function xSelect(sId, fnSubOnChange, sMainName, sSubName, bUnder, iMargin) // Ob
         s2.disabled = false;
       }
     }
+    if(xWidth(s0.parentNode) <= (xWidth(s1)+xWidth(s2))) {
+      xWidth(s0.parentNode, (xWidth(s1)+xWidth(s2)+2));
+    }
   }
 
   // Check for required browser objects
