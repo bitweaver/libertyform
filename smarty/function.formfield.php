@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.1 2009/12/07 16:39:51 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.2 2009/12/10 13:56:07 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -89,19 +89,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 			// $htmldiv = ''; // Get rid of row div and forminput - TODO might need to fix if use from formfields
 			break;
 		case 'boolack':
-			$boolparams = '';
-			$ackparams = 'disabled="disabled" ';
-			if($field['value'] == 'y') { // field true but not acknowledged
-				$boolparams = 'checked="checked" ';
-				$ackparams = '';
-			} elseif($field['value'] == 'a') { // field true and acknowledged
-				$boolparams = 'checked="checked" ';
-				$ackparams = 'checked="checked" ';
-			}
-			$forminput = '<input type="checkbox" name="'.$inpname.'[]" id="'.$inpid.'" value="y"
-				onchange="boolackFlip(this)" '.$boolparams.'/>';
-			$forminput .= ' '.$field['acktext'].
-				'<input type="checkbox" name="'.$inpname.'[]" id="'.$inpid.'_ack" value="a" '.$ackparams.'/>';
+			$forminput = boolackInput($field, $inpname, $inpid);
 			break;
 		case 'text':
 		default:
