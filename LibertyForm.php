@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.9 2009/12/09 21:59:52 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.10 2009/12/10 22:17:15 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @package LibertyForm
  */
 
@@ -241,23 +241,22 @@ class LibertyForm extends LibertyMime {
 					$idx = 1;
 					foreach($this->mInfo[$fieldname] as $mfid => $mfval) {
 						foreach($field['fields'] as $mfname => $mfattrs) {
-							if($mfname != 'remove') $pParamHash[$fieldname][$mfname][$idx] = $mfval[$mfname];
+							switch($mfattrs['type']) {
+								case 'remove':
+									// ignore
+									break;
+								case 'boolack':
+									$pParamHash[$fieldname][$mfname][$idx] = self::boolackHash($mfval[$mfname]);
+									break;
+								default:
+									$pParamHash[$fieldname][$mfname][$idx] = $mfval[$mfname];
+									break;
+							}
 						}
 						$idx++;
 					}
 				} elseif($field['type'] == 'boolack') {
-					switch($this->mInfo[$fieldname]) {
-						case 'a':
-							$pParamHash[$fieldname][] = 'a';
-							// No break - fallthru to 'y' is intentional
-						case 'y':
-							$pParamHash[$fieldname][] = 'y';
-							break;
-						case 'n':
-						default:
-							// No entry in param hash, just like a real form would do
-							break;
-					}
+					$pParamHash[$fieldname] = self::boolackHash($this->mInfo[$fieldname]);
 				} else {
 					$pParamHash[$fieldname] = $this->mInfo[$fieldname];
 				}
@@ -268,6 +267,24 @@ class LibertyForm extends LibertyMime {
 			if($field['type'] == 'boolfields') $this->buildFakeHash($field['fields'], $pParamHash);
 		}
 	} // }}} buildFakeHash()
+
+	// {{{ boolackHash() helper function for boolack fields and buildFakeHash
+	protected static function boolackHash($pFieldVal) {
+		$ret = NULL;
+		switch($pFieldVal) {
+			case 'a':
+				$ret[] = 'a';
+				// No break - fallthru to 'y' is intentional
+			case 'y':
+				$ret[] = 'y';
+				break;
+			case 'n':
+			default:
+				// No entry in param hash, just like a real form would do
+				break;
+		}
+		return $ret;
+	} // }}} boolackHash()
 
 	// {{{ verifyData() make sure the data is safe to store
 	/** This function is responsible for data integrity and validation before any operations are performed with the $pParamHash
@@ -379,7 +396,7 @@ class LibertyForm extends LibertyMime {
 					$pParamHash[$pChildStore][$fieldname] = substr($pParamHash[$fieldname], 0, $field['maxlen']);
 				} elseif($field['type'] == "boolack") {
 					if(!is_array($pParamHash[$fieldname])) { // Something is broken
-						$pParamHash[$pChildStore][$fieldname] = 'n';
+						$pParamHash[$pChildStore][$fieldname] = NULL;
 					} elseif(in_array('a', $pParamHash[$fieldname]) && in_array('y', $pParamHash[$fieldname])) {
 						$pParamHash[$pChildStore][$fieldname] = 'a';
 					} elseif(in_array('y', $pParamHash[$fieldname])) {
@@ -418,7 +435,7 @@ class LibertyForm extends LibertyMime {
 									}
 									if($colattrs['type'] == 'boolack') {
 										if(!is_array($colval)) { // Something is broken
-											$bindvarray[$idx][$colname] = 'n';
+											$bindvarray[$idx][$colname] = NULL;
 										} elseif(in_array('a', $colval) && in_array('y', $colval)) {
 											$bindvarray[$idx][$colname] = 'a';
 										} elseif(in_array('y', $colval)) {
