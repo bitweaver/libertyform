@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.11 2009/12/11 15:12:15 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.12 2009/12/11 19:43:46 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @package LibertyForm
  */
 
@@ -101,7 +101,9 @@ class LibertyForm extends LibertyMime {
 		// If no updated data hash passed in fake pParamHash from objects existing data
 		if($pParamHash == NULL) $pParamHash = $this->fakeStoreHash();
 		$childStore = $this->mChildPkgName.'_store';
-		if($this->verifyData($pParamHash, $childStore) && parent::store($pParamHash)) {
+		if($this->verifyData($pParamHash, $childStore) &&
+		   // really ought to be dealt with in the parent object - this check is not a full solution
+		   (!array_key_exists('edit', $pParamHash) || parent::store($pParamHash))) {
 			$this->mDb->StartTrans();
 			if($this->mId) {
 				$locId = array($this->mChildIdName => $pParamHash[$this->mChildIdName]);
@@ -391,7 +393,9 @@ class LibertyForm extends LibertyMime {
 				} elseif((($field['type'] == 'options') && ($field['typopt'] == 'multiple')) ||
 				         ($field['type'] == 'checkboxes')) { // Deal with fields that contain multiple values
 					// This assumes the field is a bitfield - may want to have other choices ...
-					$pParamHash[$pChildStore][$fieldname] = array_sum($pParamHash[$fieldname]);
+					if(is_array($pParamHash[$fieldname])) {
+						$pParamHash[$pChildStore][$fieldname] = array_sum($pParamHash[$fieldname]);
+					}
 				} elseif(($field['type'] == 'text') && isset($field['maxlen']) && !empty($field['maxlen'])) { 
 					$pParamHash[$pChildStore][$fieldname] = substr($pParamHash[$fieldname], 0, $field['maxlen']);
 				} elseif($field['type'] == "boolack") {
