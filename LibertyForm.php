@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.10 2009/12/10 22:17:15 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.11 2009/12/11 15:12:15 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @package LibertyForm
  */
 
@@ -19,8 +19,8 @@ class LibertyForm extends LibertyMime {
 	private $mFormTbl;
 	private $mFormSeq;
 	private $mChildPkgName;
-	private $mChildIdName;
-	private $mBaseURL;
+	protected $mChildIdName;
+	protected $mBaseURL;
 
 // {{{ ---- public functions ----
 	// {{{ __construct()
