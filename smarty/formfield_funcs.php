@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.2 2009/12/10 13:56:07 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.3 2009/12/14 22:26:38 dansut Exp $
 /**
  * Functions used in formfield Smarty plugins
  * @package bitweaver
@@ -39,7 +39,7 @@ function optionsInput($sparams, $field, &$smarty) {
 
 	if(isset($field['typopt']) && ($field['typopt'] == 'multiple')) {
 		$sparams['multiple'] = 'multiple';
-		if(!is_array($sparams['selected'])) $sparams['selected'] = bf2arr($field['value']);
+		if(!is_array($sparams['selected'])) $sparams['selected'] = bf2array($field['value']);
 		$sparams['name'] .= '[]';
 	}
 
