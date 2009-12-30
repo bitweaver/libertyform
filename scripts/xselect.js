@@ -15,7 +15,7 @@ function xSelect(sId, fnSubOnChange, sMainName, sSubName, bUnder, iMargin) // Ob
     // insert new
     var a = this.xSelData, ig = this.selectedIndex;
     for(io=1; io<a[ig].length; ++io) {
-      s2.options[io-1] = new Option(a[ig][io].label);
+      s2.options[io-1] = new Option(a[ig][io].label, a[ig][io].value);
       s2.options[io-1].selected = (a[ig][0].subsel == io);
       if(a[ig][io].value != 0) {
         s2.disabled = false;
