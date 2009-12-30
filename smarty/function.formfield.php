@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.2 2009/12/10 13:56:07 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.3 2009/12/30 21:12:50 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -90,6 +90,14 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 			break;
 		case 'boolack':
 			$forminput = boolackInput($field, $inpname, $inpid);
+			break;
+		case 'currency':
+			$dollars = $field['value']/100;
+			$cents = $field['value']%100;
+			$forminput = '$<input type="text" size="7" maxlength="7" class="forminp_currency"
+				name="'.$inpname.'[unit]" id="'.$inpid.'_unit" value="'.$dollars.'" />';
+			$forminput .= '.<input type="text" size="2" maxlength="2" class="forminp_currency"
+				name="'.$inpname.'[frac]" id="'.$inpid.'_frac" value="'.$cents.'" />';
 			break;
 		case 'text':
 		default:

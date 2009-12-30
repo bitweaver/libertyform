@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.13 2009/12/11 20:53:20 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.14 2009/12/30 21:12:50 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @package LibertyForm
  */
 
@@ -259,6 +259,9 @@ class LibertyForm extends LibertyMime {
 					}
 				} elseif($field['type'] == 'boolack') {
 					$pParamHash[$fieldname] = self::boolackHash($this->mInfo[$fieldname]);
+				} elseif($field['type'] == 'currency') {
+					$pParamHash[$fieldname]['unit'] = $this->mInfo[$fieldname] / 100;
+					$pParamHash[$fieldname]['frac'] = $this->mInfo[$fieldname] % 100;
 				} else {
 					$pParamHash[$fieldname] = $this->mInfo[$fieldname];
 				}
@@ -407,6 +410,17 @@ class LibertyForm extends LibertyMime {
 						$pParamHash[$pChildStore][$fieldname] = 'y';
 					} else { // Something weird is going on
 						$pParamHash[$pChildStore][$fieldname] = 'n';
+					}
+				} elseif($field['type'] == "currency") {
+					if(!(empty($pParamHash[$fieldname]['frac']) || is_numeric($pParamHash[$fieldname]['frac'])) ||
+					   !(empty($pParamHash[$fieldname]['unit']) || is_numeric($pParamHash[$fieldname]['unit']))) {
+						$this->mErrors[$fieldname] = $field['description']." must be numeric.";
+					} else {
+						$pParamHash[$pChildStore][$fieldname] =
+							($pParamHash[$fieldname]['unit'] * 100) + $pParamHash[$fieldname]['frac'];
+						if(isset($field['required']) && empty($pParamHash[$pChildStore][$fieldname])) {
+							$this->mErrors[$fieldname] = $field['description']." must be non zero.";
+						}
 					}
 				} elseif($field['type'] == "boolfields") {
 					// Actual field is very simple to deal with and could be dealt with by default else, but ...
