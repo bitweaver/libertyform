@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.8 2009/12/30 21:12:50 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.9 2010/01/04 21:57:44 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -177,7 +177,7 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 								name="'.$grpname.'['.$fieldname.']['.$mfname.']" value="'.$idx.'">';
 							break;
 						case 'hidden':
-							$newinprow = '<input type="hidden" id="'.$htmlid.'" name="'.$htmlname.'"
+							$tdcontent = '<input type="hidden" id="'.$htmlid.'" name="'.$htmlname.'"
 								value="'.$defval.'" />';
 							break;
 						case 'text':

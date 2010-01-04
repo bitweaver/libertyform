@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.14 2009/12/30 21:12:50 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.15 2010/01/04 21:57:43 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @package LibertyForm
  */
 
@@ -430,11 +430,12 @@ class LibertyForm extends LibertyMime {
 				} elseif($field['type'] == "multiple") {
 					$bindvarray = array(); // This is the array that may eventually get passed back to store()
 					$checkboxcols = array(); // Checkboxes don't give feedback on 'no check' so dealt with differently
-					$removerows = array(); // Array of $bindvarray indexes that need removing due to invalidness
+					$reqcols = array(); // Array of column names that reuire values to be filled in
 					$removeidxs = array(); // Array of $bindvarray indexes that need removing by user request
 					$radiocols = array(); // Array of columns that contain groups of radio buttons, index column name
 					foreach($field['fields'] as $colname => $colattrs) {
 						$colvals = (isset($pParamHash[$fieldname][$colname]) ? $pParamHash[$fieldname][$colname] : array());
+						if(isset($colattrs['required']) && $colattrs['required']) $reqcols[$colname] = $colname;
 						switch($colattrs['type']) {
 							case 'checkbox':
 								$checkboxcols[$colname] = $colvals;
@@ -447,10 +448,6 @@ class LibertyForm extends LibertyMime {
 								break;
 							default:
 								foreach($colvals as $idx => $colval) {
-									// If empty 'required' value, mark index to be deleted
-									if(empty($colval) && isset($colattrs['required']) && ($colattrs['required'] == TRUE)) {
-										$removerows[$idx] = $idx; // key is same as val to avoid duplicates
-									}
 									if($colattrs['type'] == 'boolack') {
 										if(!is_array($colval)) { // Something is broken
 											$bindvarray[$idx][$colname] = NULL;
@@ -468,12 +465,17 @@ class LibertyForm extends LibertyMime {
 								break;
 						}
 					}
-					// Remove any rows that have 'required' fields that aren't filled in
-					foreach($removerows as $idx) unset($bindvarray[$idx]);
 					// Remove any rows that have a check in the remove checkbox
 					foreach($removeidxs as $idx) unset($bindvarray[$idx]);
 					// Loop through the bindvariables of our multiple elements doing some field fixup
 					foreach($bindvarray as $idx => &$bindvar) {
+						// Remove any rows with required columns that aren't filled in
+						foreach($reqcols as $reqcolname) {
+							if(!isset($bindvar[$reqcolname]) || empty($bindvar[$reqcolname])) {
+								unset($bindvarray[$idx]);
+								continue 2; // next $bindvar in the bindvarray
+							}
+						}
 						// Add the values from the checkbox columns
 						foreach($checkboxcols as $colname => $colvals) {
 							$bindvar[$colname] = ((in_array($idx, $colvals)) ? 'y' : 'n');
