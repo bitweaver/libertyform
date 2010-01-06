@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.4 2010/01/06 18:56:47 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.5 2010/01/06 21:14:17 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -20,6 +20,9 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 			case 'name':
 				$name = $val;
 				break;
+			case 'value':
+				$value = $val;
+				break;
 			case 'field':
 				$field = $val;
 				break;
@@ -31,6 +34,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 				break;
 		}
 	}
+	if(!isset($value)) $value = $field['value'];
 
 	$inpname = $grpname.'['.$name.']';
 	$inpid = str_replace('[', '_', str_replace(']', '', $grpname)).'_'.$name;
@@ -41,12 +45,12 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 				'id' => $inpid,
 				'options' => $field['options'],
 				// If value is not an array assume it is a bitfield
-				'selected' => (is_array($field['value']) ? $field['value'] : bf2array($field['value'])));
+				'selected' => (is_array($value) ? $value : bf2array($value)));
 			require_once($gBitSmarty->_get_plugin_filepath('function', 'html_checkboxes'));
 			$forminput = smarty_function_html_checkboxes($smartyparams, $gBitSmarty);
 			break;
 		case 'checkbox':
-			$boolparams = (($field['value'] == 'y') ? 'checked="checked" ' : '');
+			$boolparams = (($value == 'y') ? 'checked="checked" ' : '');
 			$forminput = '<input type="checkbox" name="'.$inpname.'" id="'.$inpid.'" value="y" '.$boolparams.'/>';
 			break;
 		case 'options':
@@ -54,7 +58,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 				'name' => $inpname,
 				'id' => $inpid,
 				'options' => optionsArray($field),
-				'selected' => $field['value']);
+				'selected' => $value);
 			$forminput = optionsInput($smartyparams, $field, $gBitSmarty);
 			if(empty($forminput)) $forminput = "<em>Sorry, no options available right now!</em>";
 			break;
@@ -63,7 +67,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 				'name' => $inpname,
 				'id' => $inpid,
 				'options' => $field['options'],
-				'selected' => $field['value']);
+				'selected' => $value);
 			require_once($gBitSmarty->_get_plugin_filepath('function', 'html_radios'));
 			$forminput = smarty_function_html_radios($smartyparams, $gBitSmarty);
 			break;
@@ -71,7 +75,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 			$smartyparams = array(
 				'field_array' => $inpname,
 				'prefix' => "",
-				'time' => $field['value'],
+				'time' => $value,
 				'start_year' => "-100",
 				'end_year' => "+100");
 			if(isset($field['typopt'])) {
@@ -85,27 +89,27 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 			$forminput = smarty_function_html_select_date($smartyparams, $gBitSmarty);
 			break;
 		case 'hidden':
-			$forminput = '<input type="hidden" name="'.$inpname.'" id="'.$inpid.'" value="'.$field['value'].'" />';
+			$forminput = '<input type="hidden" name="'.$inpname.'" id="'.$inpid.'" value="'.$value.'" />';
 			// $htmldiv = ''; // Get rid of row div and forminput - TODO might need to fix if use from formfields
 			break;
 		case 'boolack':
 			$forminput = boolackInput($field, $inpname, $inpid);
 			break;
 		case 'currency':
-			$dollars = $field['value']/100;
-			$cents = $field['value']%100;
+			$dollars = intval($value/100);
+			$cents = $value%100;
 			$forminput = '$<input type="text" size="7" maxlength="7" class="forminp_currency"
 				name="'.$inpname.'[unit]" id="'.$inpid.'_unit" value="'.$dollars.'" />';
 			$forminput .= '.<input type="text" size="2" maxlength="2" class="forminp_currency"
 				name="'.$inpname.'[frac]" id="'.$inpid.'_frac" value="'.$cents.'" />';
 			break;
 		case 'section':
-			$forminput = ""; // Just used as a spacer for now
+			$forminput = "<hr>"; // Just used as a spacer for now
 			break;
 		case 'text':
 		default:
 			$forminput = '<input type="text" size="'.$field['maxlen'].'" maxlength="'.$field['maxlen'].'"
-				name="'.$inpname.'" id="'.$inpid.'" value="'.$field['value'].'" />';
+				name="'.$inpname.'" id="'.$inpid.'" value="'.$value.'" />';
 			break;
 	}
 	return $forminput;
