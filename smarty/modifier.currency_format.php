@@ -14,7 +14,7 @@
 function smarty_modifier_currency_format($pAmount) {
 	if(!is_numeric($pAmount)) return '\$invalid';
 	$amount = (int)$pAmount;
-	$ret = ($amount > 0) ? '' : '-';
+	$ret = ($amount < 0) ? '-' : '';
 	$ret .= '$'.((int)($amount/100)).'.'.sprintf('%02u', $amount%100);
 	return $ret;
 }
