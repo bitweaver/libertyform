@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.3 2009/12/30 21:12:50 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.4 2010/01/06 18:56:47 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -98,6 +98,9 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 				name="'.$inpname.'[unit]" id="'.$inpid.'_unit" value="'.$dollars.'" />';
 			$forminput .= '.<input type="text" size="2" maxlength="2" class="forminp_currency"
 				name="'.$inpname.'[frac]" id="'.$inpid.'_frac" value="'.$cents.'" />';
+			break;
+		case 'section':
+			$forminput = ""; // Just used as a spacer for now
 			break;
 		case 'text':
 		default:
