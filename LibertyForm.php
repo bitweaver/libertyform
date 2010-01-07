@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.15 2010/01/04 21:57:43 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.16 2010/01/07 15:51:07 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @package LibertyForm
  */
 
@@ -260,7 +260,7 @@ class LibertyForm extends LibertyMime {
 				} elseif($field['type'] == 'boolack') {
 					$pParamHash[$fieldname] = self::boolackHash($this->mInfo[$fieldname]);
 				} elseif($field['type'] == 'currency') {
-					$pParamHash[$fieldname]['unit'] = $this->mInfo[$fieldname] / 100;
+					$pParamHash[$fieldname]['unit'] = intval($this->mInfo[$fieldname] / 100);
 					$pParamHash[$fieldname]['frac'] = $this->mInfo[$fieldname] % 100;
 				} else {
 					$pParamHash[$fieldname] = $this->mInfo[$fieldname];
