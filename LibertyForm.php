@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.16 2010/01/07 15:51:07 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.17 2010/01/07 17:47:29 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @package LibertyForm
  */
 
@@ -435,7 +435,10 @@ class LibertyForm extends LibertyMime {
 					$radiocols = array(); // Array of columns that contain groups of radio buttons, index column name
 					foreach($field['fields'] as $colname => $colattrs) {
 						$colvals = (isset($pParamHash[$fieldname][$colname]) ? $pParamHash[$fieldname][$colname] : array());
-						if(isset($colattrs['required']) && $colattrs['required']) $reqcols[$colname] = $colname;
+						if(($colattrs['type'] != 'radio') && // Radio columns aren't really multifields
+						   isset($colattrs['required']) && $colattrs['required']) {
+							$reqcols[$colname] = $colname; // Keep track of required colums for multifields
+						}
 						switch($colattrs['type']) {
 							case 'checkbox':
 								$checkboxcols[$colname] = $colvals;
