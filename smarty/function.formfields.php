@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.9 2010/01/04 21:57:44 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.10 2010/01/07 16:17:21 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -83,7 +83,7 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 					if((array_key_exists('description', $mf)) &&
 					   !(($mf['type'] == 'remove') && empty($field['value']))) {
 						$forminput .= '<td class="formsublabel">'.$mf['description'].'</td>';
-					} elseif($mf['type'] != 'hidden') {
+					} else {
 						$forminput .= '<td></td>';
 					}
 				}
@@ -123,7 +123,7 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 									name="'.$grpname.'['.$fieldname.']['.$mfname.']" value="'.$idx.'">';
 								break;
 							case 'hidden':
-								$forminput .= '<input type="hidden" id="'.$htmlid.'" name="'.$htmlname.'"
+								$tdcontent .= '<input type="hidden" id="'.$htmlid.'" name="'.$htmlname.'"
 									value="'.$mfval[$mfname].'" />';
 								break;
 							case 'text':
