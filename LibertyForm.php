@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.17 2010/01/07 17:47:29 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.18 2010/01/11 16:09:17 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  * @package LibertyForm
  */
 
@@ -261,7 +261,7 @@ class LibertyForm extends LibertyMime {
 					$pParamHash[$fieldname] = self::boolackHash($this->mInfo[$fieldname]);
 				} elseif($field['type'] == 'currency') {
 					$pParamHash[$fieldname]['unit'] = intval($this->mInfo[$fieldname] / 100);
-					$pParamHash[$fieldname]['frac'] = $this->mInfo[$fieldname] % 100;
+					$pParamHash[$fieldname]['frac'] = abs($this->mInfo[$fieldname] % 100);
 				} else {
 					$pParamHash[$fieldname] = $this->mInfo[$fieldname];
 				}
@@ -416,8 +416,9 @@ class LibertyForm extends LibertyMime {
 					   !(empty($pParamHash[$fieldname]['unit']) || is_numeric($pParamHash[$fieldname]['unit']))) {
 						$this->mErrors[$fieldname] = $field['description']." must be numeric.";
 					} else {
-						$pParamHash[$pChildStore][$fieldname] =
-							($pParamHash[$fieldname]['unit'] * 100) + $pParamHash[$fieldname]['frac'];
+						$tmpval = ($pParamHash[$fieldname]['unit'] * 100);
+						$tmpval += ((($tmpval<0)?-1:1) * abs($pParamHash[$fieldname]['frac']));
+						$pParamHash[$pChildStore][$fieldname] = $tmpval;
 						if(isset($field['required']) && empty($pParamHash[$pChildStore][$fieldname])) {
 							$this->mErrors[$fieldname] = $field['description']." must be non zero.";
 						}
