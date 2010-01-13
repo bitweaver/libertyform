@@ -2,3 +2,5 @@
 .forminput td { padding-right:0.5em; }
 .formsublabel { font-style:italic; }
 input.forminp_currency { text-align:right; }
+.subform div.formlabel { width:10em; }
+.subform div.forminput { margin-left:10.5em; }
