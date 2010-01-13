@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.18 2010/01/11 16:09:17 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.19 2010/01/13 15:42:33 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @package LibertyForm
  */
 
@@ -543,7 +543,7 @@ class LibertyForm extends LibertyMime {
 			$val['value'] = NULL;
 			if(!empty($this->mInfo[$name])) {
 				$val['value'] = $this->mInfo[$name];
-			} else if(array_key_exists('defval', $val)) {
+			} elseif(array_key_exists('defval', $val)) {
 				$val['value'] = $val['defval'];
 			}
 			// Some of the fields with specific types need 'special' processing to set their values up
@@ -553,6 +553,8 @@ class LibertyForm extends LibertyMime {
 					foreach($val['fields'] as $mfname => &$mfval) {
 						$mfval['value'] = ((($mfval['type'] == 'radio') && isset($this->mInfo[$mfname])) ? $this->mInfo[$mfname] : NULL);
 					}
+				} elseif($val['type'] == 'radios') {
+					if(empty($val['value'])) unset($val['value']);
 				} elseif($val['type'] == 'boolfields') {
 					$subwanted = NULL;
 					if(isset($pWantedFields) && is_array($pWantedFields[$name])) {
