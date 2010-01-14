@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.7 2010/01/13 15:42:33 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.8 2010/01/14 15:27:41 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -69,6 +69,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 				'label_ids' => TRUE,
 				'options' => $field['options']);
 			if(isset($value)) $smartyparams['selected'] = $value;
+			if(isset($field['onclick'])) $smartyparams['onclick'] = $field['onclick'];
 			if(isset($field['typopt']) && (strncasecmp($field['typopt'], 'vertical', 4) == 0)) {
 				$smartyparams['separator'] = '<br />';
 			}
