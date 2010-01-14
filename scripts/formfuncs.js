@@ -11,3 +11,11 @@ function boolfieldsFlip(boolfield) {
     divfield.style.display = ((boolfield.checked) ? 'block' : 'none');
   }
 }
+function newRadioFlip(triggerId) {
+  subfieldsId = triggerId+'_fielddiv';
+  if((trigger = xGetElementById(triggerId)) && (subfields = xGetElementById(subfieldsId))) {
+    subfields.style.display = ((trigger.checked) ? 'block' : 'none');
+  } else {
+    alert("flip failed " + subfieldsId);
+  }
+}
