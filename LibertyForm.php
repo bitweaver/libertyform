@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.19 2010/01/13 15:42:33 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.20 2010/01/14 21:49:42 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @package LibertyForm
  */
 
@@ -363,6 +363,27 @@ class LibertyForm extends LibertyMime {
 		return $ret;
 	} // }}} getUrl()
 // }}} ---- end protected functions ----
+
+// {{{ ---- static functions ----
+	// {{{ storeConfigs()
+	static function storeConfigs($pRequest, $pChildPkgName) {
+		global $gBitSystem;
+		foreach($pRequest['_fields'] as $fieldname => $type) {
+			switch($type) {
+			  case 'checkbox':
+				$gBitSystem->storeConfig($pChildPkgName.'_'.$fieldname,
+					(isset($pRequest[$fieldname]) ? $pRequest[$fieldname] : 'n'),
+					$pChildPkgName);
+				break;
+			  default;
+				$gBitSystem->storeConfig($pChildPkgName.'_'.$fieldname,
+					(isset($pRequest[$fieldname]) ? $pRequest[$fieldname] : ''),
+					$pChildPkgName);
+				break;
+			}
+		}
+	} // }}} storeConfigs()
+// }}} ---- end static functions ----
 
 // {{{ ---- private functions ----
 	// {{{ verifyFields() process gui form elements
