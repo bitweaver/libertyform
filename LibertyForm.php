@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.20 2010/01/14 21:49:42 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.21 2010/01/15 22:56:09 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  * @package LibertyForm
  */
 
@@ -224,7 +224,7 @@ class LibertyForm extends LibertyMime {
 		if(array_key_exists('title', $this->mInfo)) $paramHash['title'] = $this->mInfo['title'];
 
 		// Real work done by a seperate function as may need calling recursively
-		$this->buildFakeHash($this->mFields, $paramHash);
+		$this->buildFakeHash($this->getFields(), $paramHash);
 
 		return $paramHash;
 	} // }}} fakeStoreHash()
@@ -236,6 +236,7 @@ class LibertyForm extends LibertyMime {
 	protected function buildFakeHash($pFields, &$pParamHash) {
 		// The derived field elements
 		foreach($pFields as $fieldname => $field) {
+			if(!isset($field['type'])) $field['type'] = 'default'; // This shouldn't really happen
 			// If object has a value set for the field use this
 			if(array_key_exists($fieldname, $this->mInfo)) {
 				// Certain field types are weird and need special processing
@@ -247,8 +248,16 @@ class LibertyForm extends LibertyMime {
 								case 'remove':
 									// ignore
 									break;
+								case 'checkbox':
+									if($mfval[$mfname] == 'y') $pParamHash[$fieldname][$mfname][$idx] = $idx;
+									break;
 								case 'boolack':
 									$pParamHash[$fieldname][$mfname][$idx] = self::boolackHash($mfval[$mfname]);
+									break;
+								case 'radio':
+									if(!empty($this->mInfo[$mfname]) && ($this->mInfo[$mfname] == $mfid)) {
+										$pParamHash[$fieldname][$mfname] = $idx;
+									}
 									break;
 								default:
 									$pParamHash[$fieldname][$mfname][$idx] = $mfval[$mfname];
@@ -271,6 +280,7 @@ class LibertyForm extends LibertyMime {
 			}
 			if($field['type'] == 'boolfields') $this->buildFakeHash($field['fields'], $pParamHash);
 		}
+		if(!isset($pParamHash[$this->mChildIdName])) $pParamHash[$this->mChildIdName] = $this->mInfo[$this->mChildIdName];
 	} // }}} buildFakeHash()
 
 	// {{{ boolackHash() helper function for boolack fields and buildFakeHash
@@ -512,7 +522,7 @@ class LibertyForm extends LibertyMime {
 					}
 					// The $radiocols array from multiple fields is used to set regular (not multiple) fields
 					foreach($radiocols as $rfname => $idx) {
-						$pParamHash[$pChildStore][$rfname] = (array_key_exists($idx, $bindvarray) ? $bindvarray[$idx][$field['idfield']] : 0);
+						$pParamHash[$pChildStore][$rfname] = (isset($bindvarray[$idx]) ? $bindvarray[$idx][$field['idfield']] : 0);
 						if(($pParamHash[$pChildStore][$rfname] > 0) || empty($bindvarray)) {
 							$this->mInfo[$rfname] = $pParamHash[$pChildStore][$rfname];
 						} elseif(isset($field['fields'][$rfname]['required']) && ($field['fields'][$rfname]['required'] == TRUE)) {
