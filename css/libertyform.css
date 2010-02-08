@@ -4,3 +4,4 @@
 input.forminp_currency { text-align:right; }
 .subform div.formlabel { width:10em; }
 .subform div.forminput { margin-left:10.5em; }
+input.formfieldprompt { color:#999999; }

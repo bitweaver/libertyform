@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.3 2009/12/14 22:26:38 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.4 2010/02/08 20:50:06 dansut Exp $
 /**
  * Functions used in formfield Smarty plugins
  * @package bitweaver
@@ -92,16 +92,14 @@ function optionsInput($sparams, $field, &$smarty) {
 function boolackInput($pField, $pName, $pId) {
 
 	$boolparams = '';
-	$ackparams = 'disabled="disabled" ';
+	$ackparams = '';
 	if($pField['value'] == 'y') { // field true but not acknowledged
 		$boolparams = 'checked="checked" ';
-		$ackparams = '';
 	} elseif($pField['value'] == 'a') { // field true and acknowledged
 		$boolparams = 'checked="checked" ';
 		$ackparams = 'checked="checked" ';
 	}
-	$forminput = '<input type="checkbox" name="'.$pName.'[]" id="'.$pId.'" value="y"
-		onchange="boolackFlip(this)" '.$boolparams.'/>';
+	$forminput = '<input type="checkbox" name="'.$pName.'[]" id="'.$pId.'" value="y" class="ff-boolack" '.$boolparams.'/>';
 	$forminput .= ' '.$pField['acktext'].
 		'<input type="checkbox" name="'.$pName.'[]" id="'.$pId.'_ack" value="a" '.$ackparams.'/>';
 

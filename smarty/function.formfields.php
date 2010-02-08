@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.10 2010/01/07 16:17:21 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.11 2010/02/08 20:50:06 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -59,13 +59,9 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 				break;
 			case 'boolfields':
 				$boolparams = $divparams = '';
-				if($field['value'] == 'y') {
-					$boolparams = 'checked="checked" ';
-				} else {
-					$divparams = 'style="display:none" ';
-				}
+				if($field['value'] == 'y') $boolparams = 'checked="checked" ';
 				$forminput = '<input type="checkbox" name="'.$grpname.'['.$fieldname.']" id="'.$fieldname.'"
-					value="y" onchange="boolfieldsFlip(this)" '.$boolparams.'/>';
+					value="y" class="ff-boolfield" '.$boolparams.'/>';
 				$smartyparams = array(
 					'fields' => $field['fields'],
 					'grpname' => $grpname);
