@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.21 2010/01/15 22:56:09 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.22 2010/02/23 20:35:04 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @package LibertyForm
  */
 
@@ -106,7 +106,11 @@ class LibertyForm extends LibertyMime {
 		   ((!array_key_exists('edit', $pParamHash) && !empty($this->mContentId)) || parent::store($pParamHash))) {
 			$this->mDb->StartTrans();
 			if($this->mId) {
-				$locId = array($this->mChildIdName => $pParamHash[$this->mChildIdName]);
+				if(isset($pParamHash[$this->mChildIdName]) && ($pParamHash[$this->mChildIdName] != $this->mId)) {
+					$this->mErrors['store'] = "Attempting to change id of existing data is not supported.";
+					return FALSE;
+				}
+				$locId = array($this->mChildIdName => $this->mId);
 				$result = $this->mDb->associateUpdate($this->mFormTbl, $pParamHash[$childStore], $locId);
 			} else {
 				$pParamHash[$childStore][$this->mChildIdName] = $this->mDb->GenID($this->mFormSeq);
@@ -280,7 +284,7 @@ class LibertyForm extends LibertyMime {
 			}
 			if($field['type'] == 'boolfields') $this->buildFakeHash($field['fields'], $pParamHash);
 		}
-		if(!isset($pParamHash[$this->mChildIdName])) $pParamHash[$this->mChildIdName] = $this->mInfo[$this->mChildIdName];
+		if(!isset($pParamHash[$this->mChildIdName]) && $this->mId) $pParamHash[$this->mChildIdName] = $this->mId;
 	} // }}} buildFakeHash()
 
 	// {{{ boolackHash() helper function for boolack fields and buildFakeHash
