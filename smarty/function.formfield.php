@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.8 2010/01/14 15:27:41 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.9 2010/03/09 21:45:43 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -46,6 +46,9 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 				'options' => $field['options'],
 				// If value is not an array assume it is a bitfield
 				'selected' => (is_array($value) ? $value : bf2array($value)));
+			if(isset($field['typopt']) && (strncasecmp($field['typopt'], 'vertical', 4) == 0)) {
+				$smartyparams['separator'] = '<br />';
+			}
 			require_once($gBitSmarty->_get_plugin_filepath('function', 'html_checkboxes'));
 			$forminput = smarty_function_html_checkboxes($smartyparams, $gBitSmarty);
 			break;
@@ -110,6 +113,12 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 			break;
 		case 'section':
 			$forminput = "<hr>"; // Just used as a spacer for now
+			break;
+		case 'textarea':
+			$forminput .= '<textarea id="'.$inpid.'" name="'.$inpname.'"';
+			if(isset($field['rows'])) $forminput .= ' rows="'.$field['rows'].'"';
+			if(isset($field['cols'])) $forminput .= ' cols="'.$field['cols'].'"';
+			$forminput .= '>'.$value.'</textarea>';
 			break;
 		case 'text':
 		default:

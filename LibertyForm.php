@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.22 2010/02/23 20:35:04 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.23 2010/03/09 21:45:43 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  * @package LibertyForm
  */
 
@@ -185,7 +185,7 @@ class LibertyForm extends LibertyMime {
 	 * @return array List of this objects GUI fields
 	 */
 	public function getFields($pWantedFields=NULL) {
-		$fields = (($pWantedFields == NULL) ?  $this->mFields : array_intersect_key($this->mFields, $pWantedFields));
+		$fields = (($pWantedFields == NULL) ? $this->mFields : array_intersect_key($this->mFields, $pWantedFields));
 		// call a seperate private function to do the work as it might need to call itself to process sub forms
 		self::privateGetFields($fields, $pWantedFields);
 

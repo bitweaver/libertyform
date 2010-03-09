@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.11 2010/02/08 20:50:06 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.12 2010/03/09 21:45:43 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -19,6 +19,10 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 		switch($key) {
 			case 'fields':
 				$fields = $val;
+				if(!is_array($fields)) { 
+					require_once($gBitSmarty->_get_plugin_filepath('function', 'formfeedback'));
+					return smarty_function_formfeedback(array('warning'=>'Invalid form fields provided'), $gBitSmarty);
+				}
 				break;
 			case 'errors':
 				$errors = $val;
@@ -50,6 +54,7 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 			case 'hidden':
 			case 'boolack':
 			case 'currency':
+			case 'textarea':
 				$smartyparams = array(
 					'name' => $fieldname,
 					'grpname' => $grpname,
@@ -206,7 +211,7 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 			require_once($gBitSmarty->_get_plugin_filepath('function', 'formfeedback'));
 			$forminput .= smarty_function_formfeedback(array('warning'=>$errors[$fieldname]), $gBitSmarty);
 		}
-		if(array_key_exists('helptext', $field)) {
+		if(($field['type'] != 'hidden') && isset($field['helptext'])) {
 			require_once($gBitSmarty->_get_plugin_filepath('function', 'formhelp'));
 			$forminput .= smarty_function_formhelp(array('note'=>$field['helptext']), $gBitSmarty);
 		}

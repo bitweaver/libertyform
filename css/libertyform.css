@@ -1,4 +1,5 @@
 .forminput table { width:auto; }
+.forminput textarea { width:auto; }
 .forminput td { padding-right:0.5em; }
 .formsublabel { font-style:italic; }
 input.forminp_currency { text-align:right; }
