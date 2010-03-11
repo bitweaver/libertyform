@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.24 2010/03/11 20:57:33 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.25 2010/03/11 21:55:49 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  * @package LibertyForm
  */
 
@@ -355,28 +355,6 @@ class LibertyForm extends LibertyMime {
 		$this->mErrors['verify'] = "::verify() should not be called directly";
 		return FALSE; // Always Fail!
 	} // }}} verify()
-
-	// {{{ getUrl() generates a URL to gain access to a specific type of function on this object
-	/**
-	 * @return string URL of this objects edit page
-	 */
-	protected static function getUrl($pBaseURL, $pChildIdName, $pId, $pFunction="") {
-		global $gBitSystem;
-		if(empty($pFunction)) {
-			$pretty_func = "";
-			$normal_func = "index";
-		} else {
-			$pretty_func = $pFunction."/";
-			$normal_func = $pFunction;
-		}
-		$ret = $pBaseURL;
-		if($gBitSystem->isFeatureActive('pretty_urls') || $gBitSystem->isFeatureActive('pretty_urls_extended')) {
-			$ret .= $pretty_func.$pId;
-		} else {
-			$ret .= $normal_func.".php?".$pChildIdName."=".$pId;
-		}
-		return $ret;
-	} // }}} getUrl()
 // }}} ---- end protected functions ----
 
 // {{{ ---- static functions ----
@@ -398,6 +376,28 @@ class LibertyForm extends LibertyMime {
 			}
 		}
 	} // }}} storeConfigs()
+
+	// {{{ getUrl() generates a URL to gain access to a specific type of function on this object
+	/**
+	 * @return string URL of this objects edit page
+	 */
+	static function getUrl($pBaseURL, $pChildIdName, $pId, $pFunction="") {
+		global $gBitSystem;
+		if(empty($pFunction)) {
+			$pretty_func = "";
+			$normal_func = "index";
+		} else {
+			$pretty_func = $pFunction."/";
+			$normal_func = $pFunction;
+		}
+		$ret = $pBaseURL;
+		if($gBitSystem->isFeatureActive('pretty_urls') || $gBitSystem->isFeatureActive('pretty_urls_extended')) {
+			$ret .= $pretty_func.$pId;
+		} else {
+			$ret .= $normal_func.".php?".$pChildIdName."=".$pId;
+		}
+		return $ret;
+	} // }}} getUrl()
 // }}} ---- end static functions ----
 
 // {{{ ---- private functions ----
