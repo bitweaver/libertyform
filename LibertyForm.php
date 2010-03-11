@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.23 2010/03/09 21:45:43 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.24 2010/03/11 20:57:33 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  * @package LibertyForm
  */
 
@@ -101,9 +101,7 @@ class LibertyForm extends LibertyMime {
 		// If no updated data hash passed in fake pParamHash from objects existing data
 		if($pParamHash == NULL) $pParamHash = $this->fakeStoreHash();
 		$childStore = $this->mChildPkgName.'_store';
-		if($this->verifyData($pParamHash, $childStore) &&
-		   // really ought to be dealt with in the parent object - this check is not a full solution
-		   ((!array_key_exists('edit', $pParamHash) && !empty($this->mContentId)) || parent::store($pParamHash))) {
+		if($this->verifyData($pParamHash, $childStore) && parent::store($pParamHash)) {
 			$this->mDb->StartTrans();
 			if($this->mId) {
 				if(isset($pParamHash[$this->mChildIdName]) && ($pParamHash[$this->mChildIdName] != $this->mId)) {
@@ -336,6 +334,9 @@ class LibertyForm extends LibertyMime {
 
 		if(!empty($pParamHash['data'])) {
 			$pParamHash['edit'] = $pParamHash['data'];
+		} elseif(!empty($this->mContentId) && !isset($pParamHash['edit'])) {
+			// If we don't do this then the data portion is deleted on a partial store
+			$pParamHash['edit'] = $this->mInfo['data'];
 		}
 
 		if(!empty($pParamHash['title'])) {
