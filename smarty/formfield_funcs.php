@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.4 2010/02/08 20:50:06 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.5 2010/03/17 18:27:58 dansut Exp $
 /**
  * Functions used in formfield Smarty plugins
  * @package bitweaver
@@ -67,7 +67,7 @@ function optionsInput($sparams, $field, &$smarty) {
 	}
 
 	if((($realopts == 1) && !isset($field['shownullopt'])) || // Only 1 (real) option and not showing null option, or
-	   (isset($field['createonly']) && $field['createonly'] && !empty($sparams['selected']))) { // 'create only' field
+	   (!empty($sparams['selected']) && !(empty($field['createonly']) && empty($field['disabled'])))) { // display only field
 		// Don't bother with the dropdown, just show text and a hidden field for value.
 		$selected = (empty($sparams['selected'])? $savekey : $sparams['selected']); // if nothing selected use only value
 		if(isset($field['displayfunc']) && is_callable($field['displayfunc'])) {
@@ -90,18 +90,19 @@ function optionsInput($sparams, $field, &$smarty) {
 }
 
 function boolackInput($pField, $pName, $pId) {
-
 	$boolparams = '';
 	$ackparams = '';
+	$xparams = (empty($pField['disabled']) ? '' : 'disabled="disabled" ');
 	if($pField['value'] == 'y') { // field true but not acknowledged
 		$boolparams = 'checked="checked" ';
 	} elseif($pField['value'] == 'a') { // field true and acknowledged
 		$boolparams = 'checked="checked" ';
 		$ackparams = 'checked="checked" ';
 	}
-	$forminput = '<input type="checkbox" name="'.$pName.'[]" id="'.$pId.'" value="y" class="ff-boolack" '.$boolparams.'/>';
+	$forminput = '<input type="checkbox" name="'.$pName.'[]" id="'.$pId.'" value="y" class="ff-boolack" '.
+		$boolparams.$xparams.'/>';
 	$forminput .= ' '.$pField['acktext'].
-		'<input type="checkbox" name="'.$pName.'[]" id="'.$pId.'_ack" value="a" '.$ackparams.'/>';
+		'<input type="checkbox" name="'.$pName.'[]" id="'.$pId.'_ack" value="a" '.$ackparams.$xparams.'/>';
 
 	return $forminput;
 }
