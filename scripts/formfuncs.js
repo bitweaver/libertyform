@@ -145,7 +145,7 @@ LibertyForm = {
   "isDomain": function (dtxt) {
     if(!dtxt.match(/^([0-9a-zA-Z\-]+\.)+[a-zA-z]+$/)) return false;
     return true;
-  },
+  }
 
 }
 // End of LibertyForm namespace
