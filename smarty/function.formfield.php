@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.10 2010/03/17 18:27:59 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.11 2010/03/25 15:51:22 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -43,7 +43,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 		} elseif(isset($field['defval'])) {
 			$value = $field['defval'];
 		} else {
-			$value = 0;
+			$value = NULL;
 		}
 	}
 
