@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.5 2010/03/17 18:27:58 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.6 2010/04/07 14:45:06 dansut Exp $
 /**
  * Functions used in formfield Smarty plugins
  * @package bitweaver
@@ -44,36 +44,30 @@ function optionsInput($sparams, $field, &$smarty) {
 	}
 
 	$realopts = 0;
-	$optgroups = FALSE;
-	// These 2 below are only used in the case of 1 real option ...
-	$savekey = 0;
-	$saveval = '';
+	$lastkey = 0;
 	if(isset($sparams['options'])) foreach($sparams['options'] as $key => $val) {
 		if(is_array($val)) { // Deal with optgroup hierarchy
-			$optgroups = TRUE;
-			$saveval = $key;
 			foreach($val as $subkey => $subval) {
+				$optgroups[$subkey] = $key.', '.$subval;
 				if(!empty($subkey)) {
 					$realopts++;
-					$saveval .= ', '.$subval;
-					$savekey = $subkey;
+					$lastkey = $subkey;
 				}
 			}
 		} else if(!empty($key)) {
 			$realopts++;
-			$savekey = $key;
+			$lastkey = $key;
 		}
-		if($realopts > 1) break; // Currently don't care if any more than 1 real option so don't waste time
 	}
 
 	if((($realopts == 1) && !isset($field['shownullopt'])) || // Only 1 (real) option and not showing null option, or
 	   (!empty($sparams['selected']) && !(empty($field['createonly']) && empty($field['disabled'])))) { // display only field
 		// Don't bother with the dropdown, just show text and a hidden field for value.
-		$selected = (empty($sparams['selected'])? $savekey : $sparams['selected']); // if nothing selected use only value
+		$selected = (empty($sparams['selected'])? $lastkey : $sparams['selected']); // if nothing selected use last value ???
 		if(isset($field['displayfunc']) && is_callable($field['displayfunc'])) {
 			$display = call_user_func($field['displayfunc'], $selected);
-		} elseif($optgroups) { // The selections are organized in hierarchical optgroups
-			$display = $saveval; // This was set up earlier when we looped through options.
+		} elseif(isset($optgroups)) { // The selections are organized in hierarchical optgroups
+			$display = $optgroups[$selected];
 		} elseif(isset($field['options'][$selected])) { // Regular option display
 			$display = $field['options'][$selected];
 		} else { // Shouldn't ever really use this default display value, but if can't get other good text
