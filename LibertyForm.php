@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.26 2010/04/07 13:29:45 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.27 2010/04/07 13:35:24 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  * @package LibertyForm
  */
 
@@ -419,7 +419,10 @@ class LibertyForm extends LibertyMime {
 
 			// If field is in the hash then it is being changed
 			if(array_key_exists($fieldname, $pParamHash)) {
-				if(empty($pParamHash[$fieldname])) { // Contents empty
+				if(!empty($field['chkenables']) && empty($pParamHash[$fieldname.'_chk'])) { // Unchecked so value is to be NULL
+					$pParamHash[$pChildStore][$fieldname] = NULL; // Specifically clear contents
+					unset($pParamHash[$fieldname]);
+				} elseif(empty($pParamHash[$fieldname])) { // Contents empty
 					if(isset($field['required'])) {
 						$this->mErrors[$fieldname] = $field['description']." is a required field.";
 					} else {

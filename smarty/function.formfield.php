@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.11 2010/03/25 15:51:22 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.12 2010/04/07 13:35:24 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -51,6 +51,14 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 	$inpid = str_replace('[', '_', str_replace(']', '', $grpname)).'_'.$name;
 	if(isset($disabled)) $field['disabled'] = $disabled;
 	$xparams = (empty($field['disabled']) ? '' : 'disabled="disabled" ');
+	$forminput = '';
+	if(!empty($field['chkenables'])) {
+		$chkparams = $xparams;
+		if(!empty($value)) $chkparams .= 'checked="checked" ';
+		$chkname = $grpname.'['.$name.'_chk]';
+		$forminput .= '<input type="checkbox" name="'.$chkname.'" id="'.$inpid.'_chk" value="y" class="ff-boolfield" '.$chkparams.'/>';
+		$forminput .= '<div id="'.$inpid.'_chk_fielddiv" class="subfield noanimate">';
+	}
 	switch($field['type']) {
 	  case 'checkboxes':
 		$smartyparams = array(
@@ -64,11 +72,11 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 		}
 		if(!empty($field['disabled'])) $smartyparams['disabled'] = 'disabled';
 		require_once($gBitSmarty->_get_plugin_filepath('function', 'html_checkboxes'));
-		$forminput = smarty_function_html_checkboxes($smartyparams, $gBitSmarty);
+		$forminput .= smarty_function_html_checkboxes($smartyparams, $gBitSmarty);
 		break;
 	  case 'checkbox':
 		$xparams .= (($value == 'y') ? 'checked="checked" ' : '');
-		$forminput = '<input type="checkbox" name="'.$inpname.'" id="'.$inpid.'" value="y" '.$xparams.'/>';
+		$forminput .= '<input type="checkbox" name="'.$inpname.'" id="'.$inpid.'" value="y" '.$xparams.'/>';
 		break;
 	  case 'options':
 		$smartyparams = array(
@@ -76,8 +84,8 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 			'id' => $inpid,
 			'options' => optionsArray($field),
 			'selected' => $value);
-		$forminput = optionsInput($smartyparams, $field, $gBitSmarty);
-		if(empty($forminput)) $forminput = "<em>Sorry, no options available right now!</em>";
+		$optinput = optionsInput($smartyparams, $field, $gBitSmarty);
+		$forminput .= (empty($optinput) ? "<em>Sorry, no options available right now!</em>" : $optinput);
 		break;
 	  case 'radios':
 		if(empty($field['disabled'])) {
@@ -92,9 +100,9 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 				$smartyparams['separator'] = '<br />';
 			}
 			require_once($gBitSmarty->_get_plugin_filepath('function', 'html_radios'));
-			$forminput = smarty_function_html_radios($smartyparams, $gBitSmarty);
+			$forminput .= smarty_function_html_radios($smartyparams, $gBitSmarty);
 		} else {
-			$forminput = (empty($field['options'][$value]) ? '' : $field['options'][$value]);
+			$forminput .= (empty($field['options'][$value]) ? '' : $field['options'][$value]);
 		}
 		break;
 	  case 'date':
@@ -113,29 +121,32 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 				}
 			}
 			require_once($gBitSmarty->_get_plugin_filepath('function', 'html_select_date'));
-			$forminput = smarty_function_html_select_date($smartyparams, $gBitSmarty);
+			$forminput .= smarty_function_html_select_date($smartyparams, $gBitSmarty);
 		} else {
-			require_once($gBitSmarty->_get_plugin_filepath('modifier', 'cal_date_format'));
-			$forminput = smarty_modifier_cal_date_format($value);
+			if(empty($value)) {
+				$forminput .= tra('unknown');
+			} else {
+				require_once($gBitSmarty->_get_plugin_filepath('modifier', 'cal_date_format'));
+				$forminput .= smarty_modifier_cal_date_format($value);
+			}
 		}
 		break;
 	  case 'hidden':
-		$forminput = '<input type="hidden" name="'.$inpname.'" id="'.$inpid.'" value="'.$value.'" />';
-		// $htmldiv = ''; // Get rid of row div and forminput - TODO might need to fix if use from formfields
+		$forminput .= '<input type="hidden" name="'.$inpname.'" id="'.$inpid.'" value="'.$value.'" />';
 		break;
 	  case 'boolack':
-		$forminput = boolackInput($field, $inpname, $inpid);
+		$forminput .= boolackInput($field, $inpname, $inpid);
 		break;
 	  case 'currency':
 		$dollars = intval($value/100);
 		$cents = abs($value%100);
-		$forminput = '$<input type="text" size="7" maxlength="7" class="forminp_currency"
+		$forminput .= '$<input type="text" size="7" maxlength="7" class="forminp_currency"
 			name="'.$inpname.'[unit]" id="'.$inpid.'_unit" value="'.$dollars.'" '.$xparams.'/>';
 		$forminput .= '.<input type="text" size="2" maxlength="2" class="forminp_currency"
 			name="'.$inpname.'[frac]" id="'.$inpid.'_frac" value="'.$cents.'" '.$xparams.'/>';
 		break;
 	  case 'section':
-		$forminput = "<hr>"; // Just used as a spacer for now
+		$forminput .= "<hr>"; // Just used as a spacer for now
 		break;
 	  case 'textarea':
 		$forminput .= '<textarea id="'.$inpid.'" name="'.$inpname.'" '.$xparams;
@@ -145,10 +156,11 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 		break;
 	  case 'text':
 	  default:
-		$forminput = '<input type="text" size="'.$field['maxlen'].'" maxlength="'.$field['maxlen'].'"
+		$forminput .= '<input type="text" size="'.$field['maxlen'].'" maxlength="'.$field['maxlen'].'"
 			name="'.$inpname.'" id="'.$inpid.'" value="'.$value.'" '.$xparams.'/>';
 		break;
 	}
+	if(!empty($field['chkenables'])) $forminput .= '</div>';
 	return $forminput;
 }
 
