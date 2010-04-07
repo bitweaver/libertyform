@@ -93,7 +93,8 @@ LibertyForm = {
   "setupBoolfield": function(boolfield) {
     $(boolfield).each(function() {
       var fielddivid = '#'+$(this).attr('id')+'_fielddiv';
-      $(this).ifChkdShow(fielddivid, false).click(function() { $(this).ifChkdShow(fielddivid, true); });
+      var animate = !$(fielddivid).hasClass('noanimate');
+      $(this).ifChkdShow(fielddivid, false).click(function() { $(this).ifChkdShow(fielddivid, animate); });
     });
   },
 
