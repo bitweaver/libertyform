@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.25 2010/03/11 21:55:49 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.26 2010/04/07 13:29:45 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  * @package LibertyForm
  */
 
@@ -428,7 +428,7 @@ class LibertyForm extends LibertyMime {
 					}
 				} elseif($field['type'] == "date") {
 					$pParamHash[$pChildStore][$fieldname] =
-						$pParamHash[$fieldname]['Year']."-".$pParamHash[$fieldname]['Month']."-".$pParamHash[$fieldname]['Day'];
+						strtotime($pParamHash[$fieldname]['Year']."-".$pParamHash[$fieldname]['Month']."-".$pParamHash[$fieldname]['Day']);
 				} elseif((($field['type'] == 'options') && ($field['typopt'] == 'multiple')) ||
 				         ($field['type'] == 'checkboxes')) { // Deal with fields that contain multiple values
 					// This assumes the field is a bitfield - may want to have other choices ...
