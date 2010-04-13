@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.12 2010/04/07 13:35:24 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.13 2010/04/13 13:41:38 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -154,10 +154,20 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 		if(isset($field['cols'])) $forminput .= 'cols="'.$field['cols'].'"';
 		$forminput .= '>'.$value.'</textarea>';
 		break;
+	  case 'package_id':
+		// this is experimental and really only functional for some LibertyForm derived content
+		global $gLibertySystem;
+		if(!empty($value) && !empty($field['content_type_guid']) &&
+		   ($content = $gLibertySystem->getLibertyClass($field['content_type_guid'])) &&
+		   method_exists($content, 'getQuickDisplay')) {
+			$postinp_display = htmlspecialchars($content->getQuickDisplay($value), ENT_QUOTES, 'ISO-8859');
+		}
+		// no break, fallthru intended
 	  case 'text':
 	  default:
 		$forminput .= '<input type="text" size="'.$field['maxlen'].'" maxlength="'.$field['maxlen'].'"
 			name="'.$inpname.'" id="'.$inpid.'" value="'.$value.'" '.$xparams.'/>';
+		if(!empty($postinp_display)) $forminput .= '&nbsp;'.$postinp_display;
 		break;
 	}
 	if(!empty($field['chkenables'])) $forminput .= '</div>';

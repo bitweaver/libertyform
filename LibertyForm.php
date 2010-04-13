@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.28 2010/04/09 19:13:38 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.29 2010/04/13 13:41:39 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  * @package LibertyForm
  */
 
@@ -440,6 +440,20 @@ class LibertyForm extends LibertyMime {
 					}
 				} elseif(($field['type'] == 'text') && isset($field['maxlen']) && !empty($field['maxlen'])) { 
 					$pParamHash[$pChildStore][$fieldname] = substr($pParamHash[$fieldname], 0, $field['maxlen']);
+				} elseif($field['type'] == "package_id") {
+					// Experimental stuff
+					if(empty($field['content_type_guid'])) {
+						$this->mErrors[$fieldname] = "Badly configured ".$field['description'].".";
+					} else {
+						global $gLibertySystem;
+						$content = $gLibertySystem->getLibertyClass($field['content_type_guid']);
+						if(method_exists($content, 'getData') &&
+						   ($content->getData($pParamHash[$fieldname]) != NULL)) {
+							$pParamHash[$pChildStore][$fieldname] = $pParamHash[$fieldname];
+						} else {
+							$this->mErrors[$fieldname] = "Given value does not match any existing ".$field['description'].".";
+						}
+					}
 				} elseif($field['type'] == "boolack") {
 					if(!is_array($pParamHash[$fieldname])) { // Something is broken
 						$pParamHash[$pChildStore][$fieldname] = NULL;

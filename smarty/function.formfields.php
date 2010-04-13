@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.13 2010/03/17 18:27:59 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfields.php,v 1.14 2010/04/13 13:41:38 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -64,6 +64,7 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 		  case 'boolack':
 		  case 'currency':
 		  case 'textarea':
+		  case 'package_id':
 			$smartyparams = array(
 				'name' => $fieldname,
 				'grpname' => $grpname,
