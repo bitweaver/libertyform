@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.29 2010/04/13 13:41:39 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.30 2010/04/15 18:04:26 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  * @package LibertyForm
  */
 
@@ -406,8 +406,23 @@ class LibertyForm extends LibertyMime {
 	 * Function is called from verifyData, is seperate func so it can be recursively called for sub forms
 	 */
 	private function verifyFields($fields, &$pParamHash, $pChildStore) {
+		// This conditional has to be done due to a bug inherited from Sample pkg that stopped Liberty Services storing.
+		// $this->store() was passed $_REQUEST[$this->mChildPkgName] which effectively stopped store() seeing any LS data.
+		// $this->store() now should always be passed $_REQUEST,
+		// so we SHOULD have pkg data in the pkgname hash key, or it MAY be still at top level of $pParamHash until all fixed.
+		if(!empty($pParamHash[$this->mChildPkgName]) && is_array($pParamHash[$this->mChildPkgName])) {
+			// So this is the good/normal case heading forward
+			$pkgData =& $pParamHash[$this->mChildPkgName];
+		} else {
+			// If this is the case then ::store($_REQUEST['<pkgname>']) was called and any LibertyServices data will not be saved
+			error_log('LibertyContent::store() should be called using $_REQUEST, not $_REQUEST[\''.$this->mChildPkgName.'\']');
+			$pkgData =& $pParamHash;
+		}
+		$pkgStore =& $pParamHash[$pChildStore];
+		$pkgStoreMulti = & $pParamHash[$pChildStore.'_multiple'];
+
 		// Set boolean if the paramhash contains a hash specifying a limited set of fields
-		$limitedFieldset = (isset($pParamHash['_fields']) && is_array($pParamHash['_fields']));
+		$limitedFieldset = (isset($pkgData['_fields']) && is_array($pkgData['_fields']));
 		// Loop through the given fields and process each one
 		foreach($fields as $fieldname => $field) {
 			// Defaults to stop PHP whining
@@ -415,31 +430,31 @@ class LibertyForm extends LibertyMime {
 			if(!isset($field['typopt'])) $field['typopt'] = '';
 
 			// Ignore any fields that are not set in the special '_fields' part of the param Hash.
-			if($limitedFieldset && !isset($pParamHash['_fields'][$fieldname])) continue;
+			if($limitedFieldset && !isset($pkgData['_fields'][$fieldname])) continue;
 
 			// If field is in the hash then it is being changed
-			if(array_key_exists($fieldname, $pParamHash)) {
-				if(!empty($field['chkenables']) && empty($pParamHash[$fieldname.'_chk'])) { // Unchecked so value is to be NULL
-					$pParamHash[$pChildStore][$fieldname] = NULL; // Specifically clear contents
-					unset($pParamHash[$fieldname]);
-				} elseif(empty($pParamHash[$fieldname])) { // Contents empty
+			if(array_key_exists($fieldname, $pkgData)) {
+				if(!empty($field['chkenables']) && empty($pkgData[$fieldname.'_chk'])) { // Unchecked so value is to be NULL
+					$pkgStore[$fieldname] = NULL; // Specifically clear contents
+					unset($pkgData[$fieldname]);
+				} elseif(empty($pkgData[$fieldname])) { // Contents empty
 					if(isset($field['required'])) {
 						$this->mErrors[$fieldname] = $field['description']." is a required field.";
 					} else {
-						$pParamHash[$pChildStore][$fieldname] = NULL; // Specifically clear contents
-						unset($pParamHash[$fieldname]); // and remove from the hash ?can't remember why?
+						$pkgStore[$fieldname] = NULL; // Specifically clear contents
+						unset($pkgData[$fieldname]); // and remove from the hash ?can't remember why?
 					}
 				} elseif($field['type'] == "date") {
-					$pParamHash[$pChildStore][$fieldname] =
-						$pParamHash[$fieldname]['Year']."-".$pParamHash[$fieldname]['Month']."-".$pParamHash[$fieldname]['Day'];
+					$pkgStore[$fieldname] =
+						$pkgData[$fieldname]['Year']."-".$pkgData[$fieldname]['Month']."-".$pkgData[$fieldname]['Day'];
 				} elseif((($field['type'] == 'options') && ($field['typopt'] == 'multiple')) ||
 				         ($field['type'] == 'checkboxes')) { // Deal with fields that contain multiple values
 					// This assumes the field is a bitfield - may want to have other choices ...
-					if(is_array($pParamHash[$fieldname])) {
-						$pParamHash[$pChildStore][$fieldname] = array_sum($pParamHash[$fieldname]);
+					if(is_array($pkgData[$fieldname])) {
+						$pkgStore[$fieldname] = array_sum($pkgData[$fieldname]);
 					}
 				} elseif(($field['type'] == 'text') && isset($field['maxlen']) && !empty($field['maxlen'])) { 
-					$pParamHash[$pChildStore][$fieldname] = substr($pParamHash[$fieldname], 0, $field['maxlen']);
+					$pkgStore[$fieldname] = substr($pkgData[$fieldname], 0, $field['maxlen']);
 				} elseif($field['type'] == "package_id") {
 					// Experimental stuff
 					if(empty($field['content_type_guid'])) {
@@ -448,39 +463,39 @@ class LibertyForm extends LibertyMime {
 						global $gLibertySystem;
 						$content = $gLibertySystem->getLibertyClass($field['content_type_guid']);
 						if(method_exists($content, 'getData') &&
-						   ($content->getData($pParamHash[$fieldname]) != NULL)) {
-							$pParamHash[$pChildStore][$fieldname] = $pParamHash[$fieldname];
+						   ($content->getData($pkgData[$fieldname]) != NULL)) {
+							$pkgStore[$fieldname] = $pkgData[$fieldname];
 						} else {
 							$this->mErrors[$fieldname] = "Given value does not match any existing ".$field['description'].".";
 						}
 					}
 				} elseif($field['type'] == "boolack") {
-					if(!is_array($pParamHash[$fieldname])) { // Something is broken
-						$pParamHash[$pChildStore][$fieldname] = NULL;
-					} elseif(in_array('a', $pParamHash[$fieldname]) && in_array('y', $pParamHash[$fieldname])) {
-						$pParamHash[$pChildStore][$fieldname] = 'a';
-					} elseif(in_array('y', $pParamHash[$fieldname])) {
-						$pParamHash[$pChildStore][$fieldname] = 'y';
+					if(!is_array($pkgData[$fieldname])) { // Something is broken
+						$pkgStore[$fieldname] = NULL;
+					} elseif(in_array('a', $pkgData[$fieldname]) && in_array('y', $pkgData[$fieldname])) {
+						$pkgStore[$fieldname] = 'a';
+					} elseif(in_array('y', $pkgData[$fieldname])) {
+						$pkgStore[$fieldname] = 'y';
 					} else { // Something weird is going on
-						$pParamHash[$pChildStore][$fieldname] = 'n';
+						$pkgStore[$fieldname] = 'n';
 					}
 				} elseif($field['type'] == "currency") {
-					if(!(empty($pParamHash[$fieldname]['frac']) || is_numeric($pParamHash[$fieldname]['frac'])) ||
-					   !(empty($pParamHash[$fieldname]['unit']) || is_numeric($pParamHash[$fieldname]['unit']))) {
+					if(!(empty($pkgData[$fieldname]['frac']) || is_numeric($pkgData[$fieldname]['frac'])) ||
+					   !(empty($pkgData[$fieldname]['unit']) || is_numeric($pkgData[$fieldname]['unit']))) {
 						$this->mErrors[$fieldname] = $field['description']." must be numeric.";
 					} else {
-						$tmpval = ($pParamHash[$fieldname]['unit'] * 100);
-						$tmpval += ((($tmpval<0)?-1:1) * abs($pParamHash[$fieldname]['frac']));
-						$pParamHash[$pChildStore][$fieldname] = $tmpval;
-						if(isset($field['required']) && empty($pParamHash[$pChildStore][$fieldname])) {
+						$tmpval = ($pkgData[$fieldname]['unit'] * 100);
+						$tmpval += ((($tmpval<0)?-1:1) * abs($pkgData[$fieldname]['frac']));
+						$pkgStore[$fieldname] = $tmpval;
+						if(isset($field['required']) && empty($pkgStore[$fieldname])) {
 							$this->mErrors[$fieldname] = $field['description']." must be non zero.";
 						}
 					}
 				} elseif($field['type'] == "boolfields") {
 					// Actual field is very simple to deal with and could be dealt with by default else, but ...
-					$pParamHash[$pChildStore][$fieldname] = $pParamHash[$fieldname];
+					$pkgStore[$fieldname] = $pkgData[$fieldname];
 					// If 'yes' then also need to deal with the subform it contains by calling ourself recursvely
-					if($pParamHash[$fieldname] == 'y') $this->verifyFields($field['fields'], $pParamHash, $pChildStore);
+					if($pkgData[$fieldname] == 'y') $this->verifyFields($field['fields'], $pParamHash, $pChildStore);
 				} elseif($field['type'] == "multiple") {
 					$bindvarray = array(); // This is the array that may eventually get passed back to store()
 					$checkboxcols = array(); // Checkboxes don't give feedback on 'no check' so dealt with differently
@@ -488,7 +503,7 @@ class LibertyForm extends LibertyMime {
 					$removeidxs = array(); // Array of $bindvarray indexes that need removing by user request
 					$radiocols = array(); // Array of columns that contain groups of radio buttons, index column name
 					foreach($field['fields'] as $colname => $colattrs) {
-						$colvals = (isset($pParamHash[$fieldname][$colname]) ? $pParamHash[$fieldname][$colname] : array());
+						$colvals = (isset($pkgData[$fieldname][$colname]) ? $pkgData[$fieldname][$colname] : array());
 						if(($colattrs['type'] != 'radio') && // Radio columns aren't really multifields
 						   isset($colattrs['required']) && $colattrs['required']) {
 							$reqcols[$colname] = $colname; // Keep track of required colums for multifields
@@ -544,9 +559,9 @@ class LibertyForm extends LibertyMime {
 					}
 					// The $radiocols array from multiple fields is used to set regular (not multiple) fields
 					foreach($radiocols as $rfname => $idx) {
-						$pParamHash[$pChildStore][$rfname] = (isset($bindvarray[$idx]) ? $bindvarray[$idx][$field['idfield']] : 0);
-						if(($pParamHash[$pChildStore][$rfname] > 0) || empty($bindvarray)) {
-							$this->mInfo[$rfname] = $pParamHash[$pChildStore][$rfname];
+						$pkgStore[$rfname] = (isset($bindvarray[$idx]) ? $bindvarray[$idx][$field['idfield']] : 0);
+						if(($pkgStore[$rfname] > 0) || empty($bindvarray)) {
+							$this->mInfo[$rfname] = $pkgStore[$rfname];
 						} elseif(isset($field['fields'][$rfname]['required']) && ($field['fields'][$rfname]['required'] == TRUE)) {
 							$this->mErrors[$fieldname] = $field['fields'][$rfname]['description']." needs a selection.";
 						}
@@ -554,10 +569,10 @@ class LibertyForm extends LibertyMime {
 					if(isset($field['required']) && empty($bindvarray)) {
 						$this->mErrors[$fieldname] = $field['description']." needs at least one entry.";
 					} else {
-						$pParamHash[$pChildStore.'_multiple'][$fieldname] = $bindvarray;
+						$pkgStoreMulti[$fieldname] = $bindvarray;
 					}
 				} else { // Any other fields just need to be saved in the DB under their fieldname
-					$pParamHash[$pChildStore][$fieldname] = $pParamHash[$fieldname];
+					$pkgStore[$fieldname] = $pkgData[$fieldname];
 				}
 			// If field is not in hash but it is a required one we need to do more checking
 			} elseif(isset($field['required']) && $field['required']) {
@@ -571,16 +586,16 @@ class LibertyForm extends LibertyMime {
 				}
 			} elseif($field['type'] == "multiple") { // non required multiple and form not providing any vals
 				// Need these keys (represents table name) to exist to make sure any existing entries get erased
-				$pParamHash[$pChildStore.'_multiple'][$fieldname] = array();
+				$pkgStoreMulti[$pChildStore.'_multiple'][$fieldname] = array();
 			} elseif(($field['type'] == "checkboxes") || ($field['type'] == "checkbox") ||
 			         ($field['type'] == "boolack") || ($field['type'] == "boolfields")) {
 			// Empty checkbox based fields don't report their existance when empty ...
-				$pParamHash[$pChildStore][$fieldname] = ''; // but still need to be zeroed
+				$pkgStore[$fieldname] = ''; // but still need to be zeroed
 			}
 			// This updates the mInfo, with validated fields even if this function will fail
 			// The reason to do this is so that the good fields stay populate when form redisplayed
-			if(array_key_exists($fieldname, $pParamHash[$pChildStore])) {
-				$this->mInfo[$fieldname] = $pParamHash[$pChildStore][$fieldname];
+			if(array_key_exists($fieldname, $pkgStore)) {
+				$this->mInfo[$fieldname] = $pkgStore[$fieldname];
 			}
 		} // end Loop through fields
 	} // }}} verifyFields()
