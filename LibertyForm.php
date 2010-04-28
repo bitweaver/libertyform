@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.31 2010/04/28 14:20:10 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.32 2010/04/28 14:25:03 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  * @package LibertyForm
  */
 
@@ -446,6 +446,8 @@ class LibertyForm extends LibertyMime {
 					// This assumes the field is a bitfield - may want to have other choices ...
 					if(is_array($pkgData[$fieldname])) {
 						$pkgStore[$fieldname] = array_sum($pkgData[$fieldname]);
+					} else {
+						$this->mErrors[$fieldname] = "Expecting bitfield array and got '".$pkgData[$fieldname]."'.";
 					}
 				} elseif(($field['type'] == 'text') && isset($field['maxlen']) && !empty($field['maxlen'])) { 
 					$pkgStore[$fieldname] = substr($pkgData[$fieldname], 0, $field['maxlen']);
