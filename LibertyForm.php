@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.32 2010/04/28 14:25:03 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.33 2010/04/28 20:03:51 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  * @package LibertyForm
  */
 
@@ -41,6 +41,17 @@ class LibertyForm extends LibertyMime {
 		// Save typing and errors, give each an element equal to its key name.
 		foreach($this->mFields as $name => &$val) $val['fieldname'] = $name;
 	} // }}}
+
+	// {{{ loadId() get data from the database by objects Id 
+	/**
+	 * Ignores any Id given to constructor or previously loaded ...
+	 * @param int $pId database Id of exiting object of this type
+	 * @return boolean TRUE on success, FALSE on failure - mErrors will contain reason for failure
+	 */
+	public function loadId($pId) {
+		$this->mId = $pId;
+		return $this->load();
+	} // }}} loadId()
 
 	// {{{ load() get data from the database either by object or libertyContent's id
 	/**

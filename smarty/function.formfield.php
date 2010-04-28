@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.13 2010/04/13 13:41:38 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.14 2010/04/28 20:03:52 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -159,8 +159,11 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 		global $gLibertySystem;
 		if(!empty($value) && !empty($field['content_type_guid']) &&
 		   ($content = $gLibertySystem->getLibertyClass($field['content_type_guid'])) &&
-		   method_exists($content, 'getQuickDisplay')) {
-			$postinp_display = htmlspecialchars($content->getQuickDisplay($value), ENT_QUOTES, 'ISO-8859');
+		   method_exists($content, 'getDataShort') && $content->loadId($value)) {
+			$postinp_display = '<a href="'.$content->getDisplayUrl().'">'.
+				htmlspecialchars($content->getDataShort(), ENT_QUOTES, 'ISO-8859').'</a>';
+
+
 		}
 		// no break, fallthru intended
 	  case 'text':
