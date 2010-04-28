@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.30 2010/04/15 18:04:26 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.31 2010/04/28 14:20:10 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  * @package LibertyForm
  */
 
@@ -436,14 +436,8 @@ class LibertyForm extends LibertyMime {
 			if(array_key_exists($fieldname, $pkgData)) {
 				if(!empty($field['chkenables']) && empty($pkgData[$fieldname.'_chk'])) { // Unchecked so value is to be NULL
 					$pkgStore[$fieldname] = NULL; // Specifically clear contents
-					unset($pkgData[$fieldname]);
-				} elseif(empty($pkgData[$fieldname])) { // Contents empty
-					if(isset($field['required'])) {
-						$this->mErrors[$fieldname] = $field['description']." is a required field.";
-					} else {
-						$pkgStore[$fieldname] = NULL; // Specifically clear contents
-						unset($pkgData[$fieldname]); // and remove from the hash ?can't remember why?
-					}
+				} elseif(empty($pkgData[$fieldname]) && isset($field['required'])) {
+					$this->mErrors[$fieldname] = $field['description']." is a required field.";
 				} elseif($field['type'] == "date") {
 					$pkgStore[$fieldname] =
 						$pkgData[$fieldname]['Year']."-".$pkgData[$fieldname]['Month']."-".$pkgData[$fieldname]['Day'];
