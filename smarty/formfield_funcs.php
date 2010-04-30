@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.6 2010/04/07 14:45:06 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/formfield_funcs.php,v 1.7 2010/04/30 17:50:30 dansut Exp $
 /**
  * Functions used in formfield Smarty plugins
  * @package bitweaver
@@ -61,15 +61,17 @@ function optionsInput($sparams, $field, &$smarty) {
 	}
 
 	if((($realopts == 1) && !isset($field['shownullopt'])) || // Only 1 (real) option and not showing null option, or
-	   (!empty($sparams['selected']) && !(empty($field['createonly']) && empty($field['disabled'])))) { // display only field
+	   !(empty($field['createonly']) && empty($field['disabled']))) { // display only field
 		// Don't bother with the dropdown, just show text and a hidden field for value.
-		$selected = (empty($sparams['selected'])? $lastkey : $sparams['selected']); // if nothing selected use last value ???
+		$selected = (empty($sparams['selected']) ? 0 : $sparams['selected']); // if nothing selected use zero
 		if(isset($field['displayfunc']) && is_callable($field['displayfunc'])) {
 			$display = call_user_func($field['displayfunc'], $selected);
-		} elseif(isset($optgroups)) { // The selections are organized in hierarchical optgroups
+		} elseif(isset($optgroups) && !empty($optgroups[$selected])) { // The selections are organized in hierarchical optgroups
 			$display = $optgroups[$selected];
 		} elseif(isset($field['options'][$selected])) { // Regular option display
 			$display = $field['options'][$selected];
+		} elseif(empty($selected)) {
+			$display = "<em>".tr('Unknown')."</em>";
 		} else { // Shouldn't ever really use this default display value, but if can't get other good text
 			$display = 'No displayable val, here\'s the Id: <em>optionval=</em>&quot;'.$selected.'&quot;';
 		}
