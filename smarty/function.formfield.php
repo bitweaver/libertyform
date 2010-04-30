@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.14 2010/04/28 20:03:52 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.15 2010/04/30 14:05:08 dansut Exp $
 /**
  * Smarty plugin
  * @package bitweaver
@@ -63,7 +63,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 	  case 'checkboxes':
 		$smartyparams = array(
 			'name' => $inpname,
-			'id' => $inpid,
+			//'id' => $inpid, this makes no sense as all inputs end up with same id, illegal HTML
 			'options' => $field['options'],
 			// If value is not an array assume it is a bitfield
 			'selected' => (is_array($value) ? $value : bf2array($value)));
@@ -157,20 +157,26 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 	  case 'package_id':
 		// this is experimental and really only functional for some LibertyForm derived content
 		global $gLibertySystem;
+		// If field is not disabled and is not an empty createonly field
+		if(empty($field['disabled']) && (empty($value) || empty($field['createonly']))) {
+			$forminput .= '<input type="text" size="'.$field['maxlen'].'" maxlength="'.$field['maxlen'].'"
+				name="'.$inpname.'" id="'.$inpid.'" value="'.$value.'" />';
+		} else {
+			$forminput .= '<input type="hidden" name="'.$inpname.'" id="'.$inpid.'" value="'.$value.'" />';
+		}
 		if(!empty($value) && !empty($field['content_type_guid']) &&
 		   ($content = $gLibertySystem->getLibertyClass($field['content_type_guid'])) &&
 		   method_exists($content, 'getDataShort') && $content->loadId($value)) {
-			$postinp_display = '<a href="'.$content->getDisplayUrl().'">'.
-				htmlspecialchars($content->getDataShort(), ENT_QUOTES, 'ISO-8859').'</a>';
-
-
+		    if(!empty($forminput)) $forminput .= '&nbsp;';
+			$fielddisp = $content->getDataShort();
+			if(empty($fielddisp)) $fielddisp = 'Id:'.$value;
+			$forminput .= '<a href="'.$content->getDisplayUrl().'">'.htmlspecialchars($fielddisp, ENT_QUOTES, 'ISO-8859').'</a>';
 		}
-		// no break, fallthru intended
+		break;
 	  case 'text':
 	  default:
 		$forminput .= '<input type="text" size="'.$field['maxlen'].'" maxlength="'.$field['maxlen'].'"
 			name="'.$inpname.'" id="'.$inpid.'" value="'.$value.'" '.$xparams.'/>';
-		if(!empty($postinp_display)) $forminput .= '&nbsp;'.$postinp_display;
 		break;
 	}
 	if(!empty($field['chkenables'])) $forminput .= '</div>';
