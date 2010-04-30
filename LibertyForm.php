@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.33 2010/04/28 20:03:51 dansut Exp $
+// $Header: /cvsroot/bitweaver/_bit_libertyform/LibertyForm.php,v 1.34 2010/04/30 13:58:43 dansut Exp $
 /**
  * LibertyForm is an intermediary object designed to hold the code for dealing with generic
  * GUI forms based on Liberty Mime objects, and their processing.  It probably shouldn't ever
@@ -7,7 +7,7 @@
  *
  * date created 2009-Jul-22
  * @author Daniel Sutcliffe
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  * @package LibertyForm
  */
 
@@ -460,8 +460,15 @@ class LibertyForm extends LibertyMime {
 					} else {
 						$this->mErrors[$fieldname] = "Expecting bitfield array and got '".$pkgData[$fieldname]."'.";
 					}
-				} elseif(($field['type'] == 'text') && isset($field['maxlen']) && !empty($field['maxlen'])) { 
-					$pkgStore[$fieldname] = substr($pkgData[$fieldname], 0, $field['maxlen']);
+				} elseif($field['type'] == 'text') {
+					$txtlen = (empty($pkgData[$fieldname]) ? 0 : strlen($pkgData[$fieldname]));
+					if(!empty($field['maxlen']) && ($txtlen > $field['maxlen'])) {
+						$pkgStore[$fieldname] = substr($pkgData[$fieldname], 0, $field['maxlen']);
+					} elseif($txtlen > 0) {
+						$pkgStore[$fieldname] = $pkgData[$fieldname];
+					} else {
+						$pkgStore[$fieldname] = NULL;
+					}
 				} elseif($field['type'] == "package_id") {
 					// Experimental stuff
 					if(empty($field['content_type_guid'])) {
