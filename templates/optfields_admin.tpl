@@ -1,4 +1,4 @@
-{* $Header: /cvsroot/bitweaver/_bit_libertyform/templates/optfields_admin.tpl,v 1.1 2010/04/27 15:39:42 dansut Exp $ *}
+{* $Header$ *}
 {strip}
 	<input type="hidden" name="page" value="{$page}" />
 	{jstabs}

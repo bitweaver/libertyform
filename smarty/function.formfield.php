@@ -1,5 +1,5 @@
 <?php
-// $Header: /cvsroot/bitweaver/_bit_libertyform/smarty/function.formfield.php,v 1.15 2010/04/30 14:05:08 dansut Exp $
+// $Header$
 /**
  * Smarty plugin
  * @package bitweaver
