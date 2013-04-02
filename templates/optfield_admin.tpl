@@ -48,7 +48,7 @@
 		<td>{formfeedback error=$oferrs.new}</td>
 	</tr>
 </tbody></table>
-<div class="row submit">
+<div class="control-group submit">
 	<input type="submit" name="submit[{$ofname}]" value="{tr}Update{/tr}" />
 </div>
 {/form}
