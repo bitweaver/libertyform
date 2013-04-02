@@ -12,7 +12,7 @@
 			<td><input type="text" size="20" maxlength="64" name="{$ofname}[{$id}][text]" value="{$ofitem.text}" /></td>
 			<td><input type="checkbox" name="{$ofname}[{$id}][active]" {if $ofitem.active eq 'y'}checked="checked"{/if} /></td>
 			<td>{if !$smarty.foreach.ofopts.last}
-				<input type="image" src="{biticon ipackage="icons" iname="go-down" url="TRUE"}" alt="Move Down" name="submit[{$ofname}][down]" value="{$id}">
+				<input type="image" src="{booticon iname="icon-cloud-download"  ipackage="icons"  url="TRUE"}" alt="Move Down" name="submit[{$ofname}][down]" value="{$id}">
 				{/if}</td>
 			<td>{if !$smarty.foreach.ofopts.first}
 				<input type="image" src="{booticon iname="icon-cloud-upload" ipackage="icons" url="TRUE"}" alt="Move Up" name="submit[{$ofname}][up]" value="{$id}">
@@ -29,7 +29,7 @@
 				<td><input type="text" size="20" maxlength="64" name="{$ofname}[{$id}][text]" value="{$ofitem.text}" /></td>
 				<td><input type="checkbox" name="{$ofname}[{$id}][active]" {if $ofitem.active eq 'y'}checked="checked"{/if} /></td>
 				<td>{if !$smarty.foreach.ofopts.last}
-					<input type="image" src="{biticon ipackage="icons" iname="go-down" url="TRUE"}" alt="Move Down" name="submit[{$ofname}][down]" value="{$id}">
+					<input type="image" src="{booticon iname="icon-cloud-download"  ipackage="icons"  url="TRUE"}" alt="Move Down" name="submit[{$ofname}][down]" value="{$id}">
 					{/if}</td>
 				<td>{if !$smarty.foreach.ofopts.first}
 					<input type="image" src="{booticon iname="icon-cloud-upload" ipackage="icons" url="TRUE"}" alt="Move Up" name="submit[{$ofname}][up]" value="{$id}">
