@@ -15,7 +15,7 @@
 				<input type="image" src="{biticon ipackage="icons" iname="go-down" url="TRUE"}" alt="Move Down" name="submit[{$ofname}][down]" value="{$id}">
 				{/if}</td>
 			<td>{if !$smarty.foreach.ofopts.first}
-				<input type="image" src="{biticon ipackage="icons" iname="go-up" url="TRUE"}" alt="Move Up" name="submit[{$ofname}][up]" value="{$id}">
+				<input type="image" src="{booticon iname="icon-cloud-upload" ipackage="icons" url="TRUE"}" alt="Move Up" name="submit[{$ofname}][up]" value="{$id}">
 				{/if}</td>
 			<td>{formfeedback error=$oferrs.$id}</td>
 		</tr>
@@ -32,7 +32,7 @@
 					<input type="image" src="{biticon ipackage="icons" iname="go-down" url="TRUE"}" alt="Move Down" name="submit[{$ofname}][down]" value="{$id}">
 					{/if}</td>
 				<td>{if !$smarty.foreach.ofopts.first}
-					<input type="image" src="{biticon ipackage="icons" iname="go-up" url="TRUE"}" alt="Move Up" name="submit[{$ofname}][up]" value="{$id}">
+					<input type="image" src="{booticon iname="icon-cloud-upload" ipackage="icons" url="TRUE"}" alt="Move Up" name="submit[{$ofname}][up]" value="{$id}">
 					{/if}</td>
 				<td>{formfeedback error=$oferrs.$id}</td>
 			</tr>
