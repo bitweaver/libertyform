@@ -49,6 +49,6 @@
 	</tr>
 </tbody></table>
 <div class="control-group submit">
-	<input type="submit" name="submit[{$ofname}]" value="{tr}Update{/tr}" />
+	<input type="submit" class="btn" name="submit[{$ofname}]" value="{tr}Update{/tr}" />
 </div>
 {/form}
