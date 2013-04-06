@@ -71,7 +71,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 			$smartyparams['separator'] = '<br />';
 		}
 		if(!empty($field['disabled'])) $smartyparams['disabled'] = 'disabled';
-		require_once($gBitSmarty->_get_plugin_filepath('function', 'html_checkboxes'));
+		$gBitSmarty->loadPlugin( 'smarty_modifier_html_checkboxes' );
 		$forminput .= smarty_function_html_checkboxes($smartyparams, $gBitSmarty);
 		break;
 	  case 'checkbox':
@@ -99,7 +99,7 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 			if(isset($field['typopt']) && (strncasecmp($field['typopt'], 'vertical', 4) == 0)) {
 				$smartyparams['separator'] = '<br />';
 			}
-			require_once($gBitSmarty->_get_plugin_filepath('function', 'html_radios'));
+			$gBitSmarty->loadPlugin( 'smarty_modifier_html_radios' );
 			$forminput .= smarty_function_html_radios($smartyparams, $gBitSmarty);
 		} else {
 			$forminput .= (empty($field['options'][$value]) ? '' : $field['options'][$value]);
@@ -120,13 +120,13 @@ function smarty_function_formfield($params, &$gBitSmarty) {
 					$smartyparams['start_year'] = '-0';
 				}
 			}
-			require_once($gBitSmarty->_get_plugin_filepath('function', 'html_select_date'));
+			$gBitSmarty->loadPlugin( 'smarty_modifier_html_select_date' );
 			$forminput .= smarty_function_html_select_date($smartyparams, $gBitSmarty);
 		} else {
 			if(empty($value)) {
 				$forminput .= tra('unknown');
 			} else {
-				require_once($gBitSmarty->_get_plugin_filepath('modifier', 'cal_date_format'));
+				$gBitSmarty->loadPlugin( 'smarty_modifier_cal_date_format' );
 				$forminput .= smarty_modifier_cal_date_format($value);
 			}
 		}

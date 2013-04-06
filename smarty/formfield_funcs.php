@@ -80,7 +80,7 @@ function optionsInput($sparams, $field, &$smarty) {
 	   !(isset($field['shownullopt']) && array_key_exists(0, $sparams['options']))) { // no NULL option we want to show
 		return "";
 	} else { // normal drop down option processing
-		require_once($smarty->_get_plugin_filepath('function', 'html_options'));
+		require_once($smarty->loadPlugin( 'smarty_function_html_options'));
 		return smarty_function_html_options($sparams, $smarty);
 	}
 }

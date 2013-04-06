@@ -20,7 +20,7 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 		  case 'fields':
 			$fields = $val;
 			if(!is_array($fields)) { 
-				require_once($gBitSmarty->_get_plugin_filepath('function', 'formfeedback'));
+				$gBitSmarty->loadPlugin( 'smarty_modifier_formfeedback' );
 				return smarty_function_formfeedback(array('warning'=>'Invalid form fields provided'), $gBitSmarty);
 			}
 			break;
@@ -40,9 +40,9 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 	}
 
 	$html = '';
-	require_once($gBitSmarty->_get_plugin_filepath('function', 'formlabel'));
-	require_once($gBitSmarty->_get_plugin_filepath('function', 'formfield'));
-	require_once($gBitSmarty->_get_plugin_filepath('block', 'forminput'));
+	$gBitSmarty->loadPlugin( 'smarty_modifier_formlabel' );
+	$gBitSmarty->loadPlugin( 'smarty_modifier_formfield' );
+	$gBitSmarty->loadPlugin( 'smarty_modifier_forminput' );
 	foreach($fields as $fieldname => $field) {
 		$extradiv = '';
 		if($field['type'] == 'hidden') {
@@ -225,11 +225,11 @@ function smarty_function_formfields($params, &$gBitSmarty) {
 			break;
 		}
 		if(isset($errors[$fieldname])) {
-			require_once($gBitSmarty->_get_plugin_filepath('function', 'formfeedback'));
+			$gBitSmarty->loadPlugin( 'smarty_modifier_formfeedback' );
 			$forminput .= smarty_function_formfeedback(array('warning'=>$errors[$fieldname]), $gBitSmarty);
 		}
 		if(isset($field['helptext']) && ($field['type'] != 'hidden') && empty($field['disabled'])) {
-			require_once($gBitSmarty->_get_plugin_filepath('function', 'formhelp'));
+			$gBitSmarty->loadPlugin( 'smarty_modifier_formhelp' );
 			$forminput .= smarty_function_formhelp(array('note'=>$field['helptext']), $gBitSmarty);
 		}
 		if(!empty($extradiv)) $forminput .= $extradiv;
